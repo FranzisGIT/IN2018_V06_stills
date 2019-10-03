@@ -25,18 +25,38 @@ TM_data <- TM_data1  %>%
   
 
 # filter out the 'overall image scores that should all have a NOTE saying 'user defined' 
-# STILL TO DO need to check if there are records where NOTE was omitted...
+# also select the entries where NOTE was omitted (forgotten), but the L2 code is of overview type
 
 OverviewScores <-  TM_data %>% 
-  filter(!is.na(NOTES))    
+  filter(!is.na(NOTES)|
+           (str_detect(L2_Code, "SU_*", negate = TRUE) & 
+           str_detect(L2_Code, "SC_*", negate = TRUE) & 
+           str_detect(L2_Code, "NS", negate = TRUE))  )   
         
 # filter out the Percent cover point annotations including blanks
-PC_cover_Anno <- TM_data %>% 
+PC_cover_Anno1 <- TM_data %>% 
   filter(str_detect(L2_Code, "SU_*")| 
          str_detect(L2_Code, "SC_*") | 
          str_detect(L2_Code, "NS") | 
          is.na(L2_Code)
           ) %>% 
-   group_by(image_key, L2_Code) %>% 
+   group_by(OpCode, image_key, L2_CAT, L2_Code) %>% 
    summarise(count = n())
+
+# extract the number of annotated points per image
+PtsPerImage <- PC_cover_Anno1 %>%
+  group_by(image_key) %>% 
+  summarise(PpI = sum(count))
+
+# join the number of points per image onto the data and calculate a percentage for each score
+PC_cover_Anno <- right_join(PC_cover_Anno1,PtsPerImage, "image_key"="image_key") %>% 
+  arrange(image_key) %>% 
+  mutate(PC_cover=100*count/PpI)
+
+ggplot(PC_cover_Anno,
+       mapping= aes(x=OpCode,
+                    y=PC_cover,
+                    colour=L2_Code)
+       )+
+         geom_point()
 
