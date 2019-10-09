@@ -1,7 +1,9 @@
 # script for tidying up data output from SEAGUS TM percent cover annotations
 # raw data file: concatenated outputs from TM in tab delimeted .txt file copied from:  
 #"\\gpfs2-hba.san.csiro.au\OA_SEAMOUNTS_SOURCE\IN2018_V06\IMP\Coral_scoring"
-# back up on GIT hub repository 
+
+# for data school the data is located on CSIRO network at: 
+#\fstas1-hba.nexus.csiro.au\CMAR-SHARE\Public\AlthausF\FA_DataSchool_FOCUS-Rawdata" 
 
 library(tidyverse)
 TM_RAWconcat <- read_tsv("data/Concat_20190930.TXT", skip = 4)  # fist 4 rows are not needed
@@ -53,6 +55,7 @@ PC_cover_Anno <- right_join(PC_cover_Anno1,PtsPerImage, "image_key"="image_key")
   arrange(image_key) %>% 
   mutate(PC_cover=100*count/PpI)
 
+# just playing with ggplot - should delete this
 ggplot(PC_cover_Anno,
        mapping= aes(x=OpCode,
                     y=PC_cover,
@@ -60,3 +63,11 @@ ggplot(PC_cover_Anno,
        )+
          geom_point()
 
+# read in additional information for each image - location name, geolocation, quadrat sizes, etc
+
+# for data school the data is located on CSIRO network at: 
+#\fstas1-hba.nexus.csiro.au\CMAR-SHARE\Public\AlthausF\FA_DataSchool_FOCUS-Rawdata" 
+
+AllSTills <- read_csv("data/IN2018_V06_AllStills.csv")
+
+right_join(PC_cover_Anno, AllSTills)
