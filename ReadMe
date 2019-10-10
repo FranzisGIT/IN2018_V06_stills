@@ -1,0 +1,45 @@
+READ ME file for IN2018_V06_stills GIT repository
+
+Author: Franzis Althaus
+
+Background:
+A survey of the seamounts south of Tasmania on board of the Australian Marine National Facility Vessel Investigator imagery of the seafloor was collected on transects using a towed camera system.
+The imagery consist of Video and stereo still images. A selection of the stereo stills are processed to generate a quadrat of measured size overlaid on the image.
+
+The data is structured into seamounts (Map Locations), transects (operations) and images that are geolocated in space. 
+The geoocation details for each image are in a separate data table.
+
+Image annotation data:
+The area within quadrats is annotated for (1) percent cover of substrate types with the matrix-forming coral (esp. Solenosmilia variabilis) being of particular interest,
+and for (2) counts of individuals of indicator taxa for 'VME' (Vulnerable Marie Ecosystems).
+
+Percent Cover annotations:
+Annotations for (1) are done in TransectMeasure (TM) software that throws 5 random point per square metre into the quadrat, and each point is given a label that identifies the substrate type.
+Types and coding used: 
+L1_CAT 		L2_CAT														L2_Code
+Biota		Cnidaria - Stony corals - Enalopsammia (live)				SC-ENLP
+			Cnidaria - Stony corals - Solenosmilia (live)				SC-SOL
+			Cnidaria - Stony corals - Madrepora (live)					SC-MAD
+Substrate	Consolidate - Biogenic - Coral reef - Enalopsammia (dead)	SU-ENLP
+			Consolidate - Biogenic - Coral reef - Solenosmilia (dead)	SU-SOL
+			Consolidate - Biogenic - Coral reef - Madrepoa (dead)		SU-MAD
+			Unconsolidate - Biogenic - Coral Rubble						SU-BCOR
+			Unconsolidate - Biogenic - Barnacle plates					SU-BBAR
+			Unconsolidate - Biogenic - other							SU-BOTH
+			Consolidate - Rock											SU-ROK
+			Consolidate - Boulder										SU-BOL
+			Consolidate - Cobbles										SU-COB
+			Consolidate - Biogenic - other								SU-CONBIO
+			Unconsolidate - Pebble - gravel								SU-PEBGRAV
+			Unconsolidate - Sand/mud									SU-SAMU
+Unscorable	Unscorable													NS
+
+In addition each image has an overview description that is (should be) flagged in the data as 'user defined'
+
+Raw percent cover data: 
+TM raw output data set concatenates point annotations of substrate types within images and a separate annotation for the entire image. 
+ needs to be tidied into a per image % cover for each substrate type
+
+
+(2)	VARS data extract: species counts for the same (or a subset) of these images – again these need to be tidies up before joining them to the image data. – I have not extracted this data set yet as annotations are still ongoing.
+
