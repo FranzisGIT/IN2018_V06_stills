@@ -126,21 +126,21 @@ ggplot(byOps,
        mapping= aes(x=OpCode,
                     y=meanPCcover,
                     colour=L2_Code)
-)+
+       )+
   geom_col()
 
 ggplot(byOps,
        mapping= aes(x=factor(L2_Code, level =SubstSeq),
                     y=meanDpth,
-                    )
-)+
-  geom_point()+
-  theme(axis.text.x = element_text(angle = 90))  # rotate the label on x-axis
+                    size=meanPCcover)
+      )+
+  geom_point(alpha=0.2)+
+  scale_y_reverse() +                            # reverse y-axis because it represents ocean depth 
+  theme(axis.text.x = element_text(angle = 90))+   # rotate the label on x-axis
+  labs(x="substrate type", y="depth")
 
-# create the same plot without summarising the data forst to look at the dept 
+# create the same plot without summarising the data first to look at the dept 
 #distribution of the substrate types
-
-
 
 ggplot(PC_cover_Anno,
        mapping= aes(x=factor(L2_Code, level =SubstSeq),              #call the pre existing vector
@@ -185,8 +185,7 @@ ggplot(Fang,
        mapping= aes(x="", 
                     y=PC_cover,               
                     fill=factor(L2_Code, level =SubstSeq)
-       )
-)+
+       ))+
   geom_bar(stat="identity", width=1)+
   coord_polar("y", start=0)
  
@@ -196,8 +195,7 @@ ggplot(Pedra,
        mapping= aes(x="", 
                     y=PC_cover,               
                     fill=factor(L2_Code, level =SubstSeq)
-       )
-)+
+       ))+
   geom_bar(stat="identity", width=1)+
   coord_polar("y", start=0)
 
@@ -207,8 +205,7 @@ ggplot(z16,
        mapping= aes(x="", 
                     y=PC_cover,               
                     fill=factor(L2_Code, level =SubstSeq)
-       )
-)+
+       ))+
   geom_bar(stat="identity", width=1)+
   coord_polar("y", start=0)
 
@@ -218,8 +215,7 @@ ggplot(Hill_U,
        mapping= aes(x="", 
                     y=PC_cover,               
                     fill=factor(L2_Code, level =SubstSeq)
-       )
-)+
+       ))+
   geom_bar(stat="identity", width=1)+
   coord_polar("y", start=0)
 
@@ -229,8 +225,7 @@ ggplot(MainMatt,
        mapping= aes(x="", 
                     y=PC_cover,               
                     fill=factor(L2_Code, level =SubstSeq)
-       )
-)+
+       ))+
   geom_bar(stat="identity", width=1)+
   coord_polar("y", start=0)
 
