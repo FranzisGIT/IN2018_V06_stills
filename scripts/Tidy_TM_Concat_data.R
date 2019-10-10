@@ -6,7 +6,7 @@
 #\fstas1-hba.nexus.csiro.au\CMAR-SHARE\Public\AlthausF\FA_DataSchool_FOCUS-Rawdata" 
 
 library(tidyverse)
-TM_RAWconcat <- read_tsv("data/Concat_20190930.TXT", skip = 4)  # fist 4 rows are not needed
+TM_RAWconcat <- read_tsv("data/Concat_20191011.TXT", skip = 4)  # fist 4 rows are not needed
 
 # select the columns that have recorded data from the file
 TM_data1 <-TM_RAWconcat %>% 
@@ -91,32 +91,6 @@ ggplot(PC_cover_Anno,
 
 # commented out because ggplot is not supported - too hard basket for now
 
-# summarising the average % of substrate types by transect (OpCode) or by seamount (MapLoc) and checking
-# checking out varaious ways of visualising the data
-
-byOps <- PC_cover_Anno %>% 
-  group_by(MapLoc,OpCode,L2_Code) %>% 
-  summarise(meanPCcover= mean(PC_cover), 
-            meanDpth=mean(Z))
-            
-ggplot(byOps,
-       mapping= aes(x=OpCode,
-                    y=meanPCcover,
-                    colour=L2_Code)
-)+
-  geom_col()
-
-ggplot(byOps,
-       mapping= aes(x=L2_Code,
-                    y=meanDpth,
-                    )
-)+
-  geom_point()+
-  theme(axis.text.x = element_text(angle = 90))  # rotate the label on x-axis
-
-# create the same plot without summarising the data forst to look at the dept 
-#distribution of the substrate types
-
 # check out the substrate codes that were annotated
 PC_cover_Anno %>% 
   group_by(L2_Code) %>% 
@@ -139,6 +113,34 @@ SubstSeq <- c('SC-ENLP',
               'SU-PEBGRAV',
               'SU-SAMU',
               'NS')
+
+# summarising the average % of substrate types by transect (OpCode) or by seamount (MapLoc) and checking
+# checking out varaious ways of visualising the data
+
+byOps <- PC_cover_Anno %>% 
+  group_by(MapLoc,OpCode,L2_Code) %>% 
+  summarise(meanPCcover= mean(PC_cover), 
+            meanDpth=mean(Z))
+            
+ggplot(byOps,
+       mapping= aes(x=OpCode,
+                    y=meanPCcover,
+                    colour=L2_Code)
+)+
+  geom_col()
+
+ggplot(byOps,
+       mapping= aes(x=factor(L2_Code, level =SubstSeq),
+                    y=meanDpth,
+                    )
+)+
+  geom_point()+
+  theme(axis.text.x = element_text(angle = 90))  # rotate the label on x-axis
+
+# create the same plot without summarising the data forst to look at the dept 
+#distribution of the substrate types
+
+
 
 ggplot(PC_cover_Anno,
        mapping= aes(x=factor(L2_Code, level =SubstSeq),              #call the pre existing vector
@@ -231,3 +233,6 @@ ggplot(MainMatt,
 )+
   geom_bar(stat="identity", width=1)+
   coord_polar("y", start=0)
+
+
+
