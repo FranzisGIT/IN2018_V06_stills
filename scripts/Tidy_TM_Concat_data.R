@@ -188,4 +188,46 @@ ggplot(Fang,
   geom_bar(stat="identity", width=1)+
   coord_polar("y", start=0)
  
+Pedra <- PC_cover_Anno %>% 
+  filter(MapLoc=="Pedra")
+ggplot(Pedra,
+       mapping= aes(x="", 
+                    y=PC_cover,               
+                    fill=factor(L2_Code, level =SubstSeq)
+       )
+)+
+  geom_bar(stat="identity", width=1)+
+  coord_polar("y", start=0)
 
+z16 <- PC_cover_Anno %>% 
+  filter(MapLoc=="z16")
+ggplot(z16,
+       mapping= aes(x="", 
+                    y=PC_cover,               
+                    fill=factor(L2_Code, level =SubstSeq)
+       )
+)+
+  geom_bar(stat="identity", width=1)+
+  coord_polar("y", start=0)
+
+Hill_U <- PC_cover_Anno %>% 
+  filter(MapLoc=="Hill U")
+ggplot(Hill_U,
+       mapping= aes(x="", 
+                    y=PC_cover,               
+                    fill=factor(L2_Code, level =SubstSeq)
+       )
+)+
+  geom_bar(stat="identity", width=1)+
+  coord_polar("y", start=0)
+
+MainMatt <- PC_cover_Anno %>% 
+  filter(MapLoc=="Main Matt")
+ggplot(MainMatt,
+       mapping= aes(x="", 
+                    y=PC_cover,               
+                    fill=factor(L2_Code, level =SubstSeq)
+       )
+)+
+  geom_bar(stat="identity", width=1)+
+  coord_polar("y", start=0)
