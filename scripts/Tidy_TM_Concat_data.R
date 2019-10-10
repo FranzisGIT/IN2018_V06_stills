@@ -1,4 +1,4 @@
-# script for tidying up data output from SEAGUS TM percent cover annotations
+# script for tidying up data output from SEAGIS TM percent cover annotations
 # raw data file: concatenated outputs from TM in tab delimeted .txt file copied from:  
 #"\\gpfs2-hba.san.csiro.au\OA_SEAMOUNTS_SOURCE\IN2018_V06\IMP\Coral_scoring"
 
