@@ -141,52 +141,51 @@ SubstSeq <- c('SC-ENLP',
               'NS')
 
 ggplot(PC_cover_Anno,
-       mapping= aes(x=factor(L2_Code, level =c('SC-ENLP',
-                                               'SU-ENLP',
-                                               'SC-SOL',
-                                               'SU-SOL',
-                                               'SC-MAD',
-                                               'SU-MAD',
-                                               'SU-BCOR',
-                                               'SU-BBAR',
-                                               'SU-BOTH',
-                                               'SU-ROK',
-                                               'SU-BOL',
-                                               'SU-COB',
-                                               'SU-CONBIO',
-                                               'SU-PEBGRAV',
-                                               'SU-SAMU',
-                                               'NS')),               # when I tried to just call the pre-existing vector it did not work
-                    y=Z,
-       )
-)+
+       mapping= aes(x=factor(L2_Code, level =SubstSeq),              #call the pre existing vector
+                    y=Z)
+  )+
   geom_point()+
   scale_y_reverse() +                            # reverse y-axis because it represents ocean depth 
   theme(axis.text.x = element_text(angle = 90))+   # rotate the label on x-axis
   labs(x="substrate type", y="depth")
 
-ggplot(PC_cover_Anno,
-       mapping= aes(x=factor(L2_Code, level =c('SC-ENLP',
-                                               'SU-ENLP',
-                                               'SC-SOL',
-                                               'SU-SOL',
-                                               'SC-MAD',
-                                               'SU-MAD',
-                                               'SU-BCOR',
-                                               'SU-BBAR',
-                                               'SU-BOTH',
-                                               'SU-ROK',
-                                               'SU-BOL',
-                                               'SU-COB',
-                                               'SU-CONBIO',
-                                               'SU-PEBGRAV',
-                                               'SU-SAMU',
-                                               'NS')),               # when I tried to just call the pre-existing vector it did not work
+subst_depthDist <- ggplot(PC_cover_Anno,
+       mapping= aes(x=factor(L2_Code, level =SubstSeq),              
                     y=Z,
-                    size=PC_cover
-       )
-)+
+                    size=PC_cover)
+  )+
   geom_point(alpha=0.2)+
   scale_y_reverse() +                            # reverse y-axis because it represents ocean depth 
   theme(axis.text.x = element_text(angle = 90))+   # rotate the label on x-axis
   labs(x="substrate type", y="depth")
+ggsave("figures/subst_depthDist.jpg", 
+       plot=subst_depthDist, 
+       dpi=600)
+
+# creating pie graphs for the distributuion of %cover by substrate types for each location 
+ggplot(PC_cover_Anno,
+          mapping= aes(x="", 
+                       y=PC_cover,               
+                       fill=factor(L2_Code, level =SubstSeq)
+                          )
+  )+
+  geom_bar(stat="identity", width=1)+
+  coord_polar("y", start=0) + 
+  facet_wrap(~MapLoc)
+  #geom_text(aes(label = paste0(round(PC_cover*100), "%")), 
+   #         position = position_stack(vjust = 0.5))+    # labels too crowded - turn them off
+
+# did not work very well - not sur why it has partially empty graphs - try and look at a couple locations separately
+
+Fang <- PC_cover_Anno %>% 
+  filter(MapLoc=="Fang")
+ggplot(Fang,
+       mapping= aes(x="", 
+                    y=PC_cover,               
+                    fill=factor(L2_Code, level =SubstSeq)
+       )
+)+
+  geom_bar(stat="identity", width=1)+
+  coord_polar("y", start=0)
+ 
+
