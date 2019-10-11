@@ -14,13 +14,13 @@ TM_data1 <-TM_RAWconcat %>%
 
 glimpse(TM_data1)
 
-# create the image_key - a unique identifier for each image using the operation number (last 3 digits from OpCode) and image number (last 4 digits of filename excuding .JPG)
+# create the image_key - a unique identifier for each image using the operation number (last 3 digits from OpCode (ignoring _NEW)) and image number (last 4 digits of filename excuding .JPG)
 # create RanSel_key the random selection number within a transect(deployment) using peration number (last 3 digits from OpCode) and random selection number (first 3 digits 
 # of filename, excluding the first letter
 
 TM_data <- TM_data1  %>% 
   mutate(RanSelNo = str_sub(Filename, start=2, end=4),
-         OpsNo = str_sub(OpCode, start=12, end=14),
+         OpsNo = str_sub(OpCode, start=12, end=14),          # this picks the operation number out ignoring tailing '_NEW'
          ImageNo = str_sub(Filename, start=48, end=51),      # separate the components out
          image_key = paste(OpsNo,"_",ImageNo, sep=""),        #create the image_key
          ranSel_key = paste(OpsNo,"_",RanSelNo, sep=""))     #create the ransom selection key
@@ -73,13 +73,43 @@ PC_cover_Anno <- left_join(PC_cover_Anno, AllSTills, by=c("image_key"="KEY"))
 # check the data for annotations that are not part of the data annotation plan (there is a number entry in Selection round and SelNo - NS replaced)
 glimpse(PC_cover_Anno)
 
-PC_cover_Anno %>% 
+check1 <- PC_cover_Anno %>% 
   group_by(`Selection round (1 orig sel, 2 replacement)`) %>% 
   summarise(n())
+ 
+check2 <- PC_cover_Anno %>% 
+  filter(is.na(`SelNo-NS eplaced`))
 
-#remove the data entries where `Selection round (1 orig sel, 2 replacement)` is NAs
+# CHECK: look at the check1 & check2 file and make sure these are not part of the selection
+# if sure, remove the data entries where `Selection round (1 orig sel, 2 replacement)` or `SelNo-NS eplaced` is NA  
 PC_cover_Anno <-  PC_cover_Anno %>% 
-  filter(!is.na(`Selection round (1 orig sel, 2 replacement)`))
+  filter(!is.na(`Selection round (1 orig sel, 2 replacement)`), !is.na(`SelNo-NS eplaced`))
+
+# rerun check1 & check2 to ensure the data was deleted.
+
+# checking distribution of scored images over random sample selection along each transect
+
+randSelPoints_byOps <-  ggplot(PC_cover_Anno,
+       aes(x=`SelNo-NS eplaced`,
+           y=`SelNo-NS eplaced`
+       ))+
+  geom_point(size=0.5)+
+  facet_wrap(~SVY_OPS)+  
+  theme(axis.text.x=element_text(size=6), 
+        axis.text.y=element_text(size=6),
+        strip.text =element_text(size=6))
+  
+ggsave("figures/randSelPoints_byOps.jpg", 
+       plot=randSelPoints_byOps, 
+       width=24, 
+       height=15,
+       units= "cm",
+       dpi=600)
+
+
+
+# NOW THE DATA IS CLEANED UP
+
 
 # just playing with ggplot - mapping the data in space 
 ggplot(PC_cover_Anno,
@@ -88,6 +118,8 @@ ggplot(PC_cover_Anno,
                     colour=L2_Code)
 )+
   geom_point()
+
+
 
 # intend to put Australia map (shape file in maps folder) as a backgrop
 #for opening up shape files I need the packages rgdal & ggmap - once installed I don't need the 
@@ -183,7 +215,7 @@ ggplot(PC_cover_Anno,
           mapping= aes(x=factor(L2_Code, level =SubstSeq),              
                        y=Z,
                        )
-)+
+  )+
   geom_point(alpha=0.2)+
   scale_y_reverse() +                            # reverse y-axis because it represents ocean depth 
   theme(axis.text.x = element_text(angle = 90))+   # rotate the label on x-axis
@@ -194,8 +226,6 @@ PC_cover_Anno %>%
   filter(is.na(Z))
 
 #FLAG: -- for finalising the data need to update depths in data extract IN2018_V06_AllStills.csv then rerun checks
-
-
 
 # creating pie graphs for the distributuion of %cover by substrate types for each location 
 ggplot(PC_cover_Anno,
@@ -261,6 +291,4 @@ ggplot(MainMatt,
        ))+
   geom_bar(stat="identity", width=1)+
   coord_polar("y", start=0)
-
-
 
