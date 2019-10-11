@@ -87,6 +87,7 @@ PC_cover_Anno <-  PC_cover_Anno %>%
 
 # rerun check1 & check2 to ensure the data was deleted.
 
+
 # checking distribution of scored images over random sample selection along each transect
 
 randSelPoints_byOps <-  ggplot(PC_cover_Anno,
@@ -108,8 +109,26 @@ ggsave("figures/randSelPoints_byOps.jpg",
 
 
 
-# NOW THE DATA IS CLEANED UP
+# spread the data into a by image matrix formatand adding the 'overview' annotation then export to .csv for taking into QGIS maps
+glimpse(PC_cover_Anno)
 
+PC_cover_Anno <- ungroup(PC_cover_Anno)   # ensuring that no groupings are left over from previous checks need to reassign!
+
+
+PC_cover_Anno %>% 
+  select(image_key, L2_Code,PC_cover) %>% 
+  spread(image_key,PC_cover)
+
+# error from spread code below pointed out three records that were duplicated in the annotation. The annotations from 
+# image 138 in operation 118 associated with the 'old' OpCode need to be deleted, the annotations for the same ops & 
+#image with OpCode IN2018_V06_118_NEW need to be kept
+#*******************************************
+PC_cover_Anno %>% 
+  filter(image_key!="118_0138", OpCode!="IN2018_V06_118")   # this seems to exclude all of each element ...
+
+
+#*******************************************
+# NOW THE DATA IS CLEANED UP
 
 # just playing with ggplot - mapping the data in space 
 ggplot(PC_cover_Anno,
