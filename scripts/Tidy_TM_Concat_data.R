@@ -70,6 +70,17 @@ nrow(PC_cover_Anno)
 
 PC_cover_Anno <- left_join(PC_cover_Anno, AllSTills, by=c("image_key"="KEY"))
 
+# check the data for annotations that are not part of the data annotation plan (there is a number entry in Selection round and SelNo - NS replaced)
+glimpse(PC_cover_Anno)
+
+PC_cover_Anno %>% 
+  group_by(`Selection round (1 orig sel, 2 replacement)`) %>% 
+  summarise(n())
+
+#remove the data entries where `Selection round (1 orig sel, 2 replacement)` is NAs
+PC_cover_Anno <-  PC_cover_Anno %>% 
+  filter(!is.na(`Selection round (1 orig sel, 2 replacement)`))
+
 # just playing with ggplot - mapping the data in space 
 ggplot(PC_cover_Anno,
        mapping= aes(x=KF_USBL_LON,
@@ -121,7 +132,8 @@ byOps <- PC_cover_Anno %>%
   group_by(MapLoc,OpCode,L2_Code) %>% 
   summarise(meanPCcover= mean(PC_cover), 
             meanDpth=mean(Z))
-            
+
+# try bar graph - not very infomative            
 ggplot(byOps,
        mapping= aes(x=OpCode,
                     y=meanPCcover,
@@ -129,6 +141,7 @@ ggplot(byOps,
        )+
   geom_col()
 
+# point scatterplot
 ggplot(byOps,
        mapping= aes(x=factor(L2_Code, level =SubstSeq),
                     y=meanDpth,
@@ -163,6 +176,26 @@ subst_depthDist <- ggplot(PC_cover_Anno,
 ggsave("figures/subst_depthDist.jpg", 
        plot=subst_depthDist, 
        dpi=600)
+
+# error message about 240 missing vales - need to check where these are why they are missing...
+# run plot without PC_cover
+ggplot(PC_cover_Anno,
+          mapping= aes(x=factor(L2_Code, level =SubstSeq),              
+                       y=Z,
+                       )
+)+
+  geom_point(alpha=0.2)+
+  scale_y_reverse() +                            # reverse y-axis because it represents ocean depth 
+  theme(axis.text.x = element_text(angle = 90))+   # rotate the label on x-axis
+  labs(x="substrate type", y="depth")
+
+# still 240 missing - missing depths? 
+PC_cover_Anno %>% 
+  filter(is.na(Z))
+
+#FLAG: -- for finalising the data need to update depths in data extract IN2018_V06_AllStills.csv then rerun checks
+
+
 
 # creating pie graphs for the distributuion of %cover by substrate types for each location 
 ggplot(PC_cover_Anno,
