@@ -117,17 +117,24 @@ PC_cover_Anno <- ungroup(PC_cover_Anno)   # ensuring that no groupings are left 
 
 PC_cover_Anno %>% 
   select(image_key, L2_Code,PC_cover) %>% 
-  spread(image_key,PC_cover)
+  spread(image_key, PC_cover)
 
-# error from spread code below pointed out three records that were duplicated in the annotation. The annotations from 
+# error from spread code above pointed out three records that were duplicated in the annotation. The annotations from 
 # image 138 in operation 118 associated with the 'old' OpCode need to be deleted, the annotations for the same ops & 
 #image with OpCode IN2018_V06_118_NEW need to be kept
-#*******************************************
-PC_cover_Anno %>% 
-  filter(image_key!="118_0138", OpCode!="IN2018_V06_118")   # this seems to exclude all of each element ...
 
 
-#*******************************************
+PC_cover_Anno <- PC_cover_Anno %>% 
+  filter(!(image_key=="118_0138" & OpCode=="IN2018_V06_118"))   # this seems to exclude all of each element ...
+
+# check it only removes 3 records then re-run spread but other way round...; 
+#join location info to the by image matrix and export for QGIS mapping
+PCcoverbyImage <- PC_cover_Anno %>% 
+  select(image_key, L2_Code,PC_cover) %>% 
+  spread(L2_Code, PC_cover) %>% 
+  left_join(AllSTills, by=c("image_key"="KEY"))
+write_csv(PCcoverbyImage, "Results/PCcoverbyImage.csv")
+
 # NOW THE DATA IS CLEANED UP
 
 # just playing with ggplot - mapping the data in space 
