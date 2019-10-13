@@ -66,7 +66,8 @@ AllSTills <- read_csv("data/IN2018_V06_AllStills.csv")
 #check number of rows in percent cover data - ensure number rows stays the same with join below
 nrow(PC_cover_Anno)
 AllSTills <- AllSTills %>% 
-  mutate(depth=as.numeric(Z))
+  mutate(depth=as.numeric(Z)) %>% 
+  select(-c(Z))
 
 # join image details to the PC cover data, overwriting the previous version
 
@@ -137,186 +138,10 @@ PCcoverbyImage <- PC_cover %>%
   left_join(AllSTills, by=c("image_key"="KEY"))
 write_csv(PCcoverbyImage, "Results/PCcoverbyImage.csv")
 
-# NOW THE DATA IS CLEANED UP
-
-# just playing with ggplot - mapping the data in space 
-ggplot(PC_cover,
-       mapping= aes(x=KF_USBL_LON,
-                    y=KF_USBL_LAT,
-                    colour=L2_Code)
-)+
-  geom_point()
+write_csv(PC_cover, "Results/PCcover.csv")
 
 
+# NOW THE DATA IS CLEANED UP: start new script using output from here
+# data exploration in script: PC_coverExplore
 
-# intend to put Australia map (shape file in maps folder) as a backgrop
-#for opening up shape files I need the packages rgdal & ggmap - once installed I don't need the 
-# install statement anymore thus
-
-#install.packages("rgdal")
-#install.packages("ggmaps")
-
-#library(rgdal)     # R wrapper around GDAL/OGR
-#library(ggmaps)    # for fortifying shapefiles   # error message package ‘ggmaps’ is not available (for R version 3.6.1)
-#library(ggplot2)   # for general plotting
-
-# commented out because ggplot is not supported - too hard basket for now
-
-# check out the substrate codes that were annotated
-PC_cover %>% 
-  group_by(L2_Code) %>% 
-  summarise(meanPCcover= mean(PC_cover), n())
-
-# create a vector with the sequence of the substrate types for ordering them in a meaningful way
-SubstSeq <- c('SC-ENLP',
-              'SU-ENLP',
-              'SC-SOL',
-              'SU-SOL',
-              'SC-MAD',
-              'SU-MAD',
-              'SU-BCOR',
-              'SU-BBAR',
-              'SU-BOTH',
-              'SU-ROK',
-              'SU-BOL',
-              'SU-COB',
-              'SU-CONBIO',
-              'SU-PEBGRAV',
-              'SU-SAMU',
-              'NS')
-
-# summarising the average % of substrate types by transect (OpCode) or by seamount (MapLoc) and checking
-# checking out varaious ways of visualising the data
-
-byOps <- PC_cover %>% 
-  group_by(MapLoc,OpCode,L2_Code) %>% 
-  summarise(meanPCcover= mean(PC_cover), 
-            meanDpth=mean(depth))
-
-# try bar graph - not very infomative            
-ggplot(byOps,
-       mapping= aes(x=OpCode,
-                    y=meanPCcover,
-                    colour=L2_Code)
-       )+
-  geom_col()
-
-# point scatterplot
-ggplot(byOps,
-       mapping= aes(x=factor(L2_Code, level =SubstSeq),
-                    y=meanDpth,
-                    size=meanPCcover)
-      )+
-  geom_point(alpha=0.2)+
-  scale_y_reverse() +                            # reverse y-axis because it represents ocean depth 
-  theme(axis.text.x = element_text(angle = 90))+   # rotate the label on x-axis
-  labs(x="substrate type", y="depth")
-
-# create the same plot without summarising the data first to look at the dept 
-#distribution of the substrate types
-
-ggplot(PC_cover,
-       mapping= aes(x=factor(L2_Code, level =SubstSeq),              #call the pre existing vector
-                    y=Z)
-  )+
-  geom_point()+
-  scale_y_reverse() +                            # reverse y-axis because it represents ocean depth 
-  theme(axis.text.x = element_text(angle = 90))+   # rotate the label on x-axis
-  labs(x="substrate type", y="depth")
-
-subst_depthDist <- ggplot(PC_cover,
-       mapping= aes(x=factor(L2_Code, level =SubstSeq),              
-                    y=Z,
-                    size=PC_cover)
-  )+
-  geom_point(alpha=0.2)+
-  scale_y_reverse() +                            # reverse y-axis because it represents ocean depth 
-  theme(axis.text.x = element_text(angle = 90))+   # rotate the label on x-axis
-  labs(x="substrate type", y="depth")
-ggsave("figures/subst_depthDist.jpg", 
-       plot=subst_depthDist, 
-       dpi=600)
-
-# error message about 240 missing vales - need to check where these are why they are missing...
-# run plot without PC_cover
-ggplot(PC_cover,
-          mapping= aes(x=factor(L2_Code, level =SubstSeq),              
-                       y=Z,
-                       )
-  )+
-  geom_point(alpha=0.2)+
-  scale_y_reverse() +                            # reverse y-axis because it represents ocean depth 
-  theme(axis.text.x = element_text(angle = 90))+   # rotate the label on x-axis
-  labs(x="substrate type", y="depth")
-
-# still 240 missing - missing depths? 
-PC_cover_Anno %>% 
-  filter(is.na(Z))
-
-#FLAG: -- for finalising the data need to update depths in data extract IN2018_V06_AllStills.csv then rerun checks
-
-# creating pie graphs for the distributuion of %cover by substrate types for each location 
-ggplot(PC_cover,
-          mapping= aes(x="", 
-                       y=PC_cover,               
-                       fill=factor(L2_Code, level =SubstSeq)
-                          )
-  )+
-  geom_bar(stat="identity", width=1)+
-  coord_polar("y", start=0) + 
-  facet_wrap(~MapLoc)
-  #geom_text(aes(label = paste0(round(PC_cover*100), "%")), 
-   #         position = position_stack(vjust = 0.5))+    # labels too crowded - turn them off
-
-# did not work very well - not sur why it has partially empty graphs - try and look at a couple locations separately
-
-Fang <- PC_cover %>% 
-  filter(MapLoc=="Fang")
-ggplot(Fang,
-       mapping= aes(x="", 
-                    y=PC_cover,               
-                    fill=factor(L2_Code, level =SubstSeq)
-       ))+
-  geom_bar(stat="identity", width=1)+
-  coord_polar("y", start=0)
- 
-Pedra <- PC_cover %>% 
-  filter(MapLoc=="Pedra")
-ggplot(Pedra,
-       mapping= aes(x="", 
-                    y=PC_cover,               
-                    fill=factor(L2_Code, level =SubstSeq)
-       ))+
-  geom_bar(stat="identity", width=1)+
-  coord_polar("y", start=0)
-
-z16 <- PC_cover %>% 
-  filter(MapLoc=="z16")
-ggplot(z16,
-       mapping= aes(x="", 
-                    y=PC_cover,               
-                    fill=factor(L2_Code, level =SubstSeq)
-       ))+
-  geom_bar(stat="identity", width=1)+
-  coord_polar("y", start=0)
-
-Hill_U <- PC_cover %>% 
-  filter(MapLoc=="Hill U")
-ggplot(Hill_U,
-       mapping= aes(x="", 
-                    y=PC_cover,               
-                    fill=factor(L2_Code, level =SubstSeq)
-       ))+
-  geom_bar(stat="identity", width=1)+
-  coord_polar("y", start=0)
-
-MainMatt <- PC_cover %>% 
-  filter(MapLoc=="Main Matt")
-ggplot(MainMatt,
-       mapping= aes(x="", 
-                    y=PC_cover,               
-                    fill=factor(L2_Code, level =SubstSeq)
-       ))+
-  geom_bar(stat="identity", width=1)+
-  coord_polar("y", start=0)
 
