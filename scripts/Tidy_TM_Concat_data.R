@@ -65,34 +65,36 @@ AllSTills <- read_csv("data/IN2018_V06_AllStills.csv")
 
 #check number of rows in percent cover data - ensure number rows stays the same with join below
 nrow(PC_cover_Anno)
+AllSTills <- AllSTills %>% 
+  mutate(depth=as.numeric(Z))
 
 # join image details to the PC cover data, overwriting the previous version
 
-PC_cover_Anno <- left_join(PC_cover_Anno, AllSTills, by=c("image_key"="KEY"))
+PC_cover <- left_join(PC_cover_Anno, AllSTills, by=c("image_key"="KEY"))
 
 # check the data for annotations that are not part of the data annotation plan (there is a number entry in Selection round and SelNo - NS replaced)
-glimpse(PC_cover_Anno)
+glimpse(PC_cover)
 
-check1 <- PC_cover_Anno %>% 
+check1 <- PC_cover %>% 
   group_by(`Selection round (1 orig sel, 2 replacement)`) %>% 
   summarise(n())
  
-check2 <- PC_cover_Anno %>% 
-  filter(is.na(`SelNo-NS eplaced`))
+check2 <- PC_cover %>% 
+  filter(is.na(`SelNo-NS replaced`))
 
 # CHECK: look at the check1 & check2 file and make sure these are not part of the selection
 # if sure, remove the data entries where `Selection round (1 orig sel, 2 replacement)` or `SelNo-NS eplaced` is NA  
-PC_cover_Anno <-  PC_cover_Anno %>% 
-  filter(!is.na(`Selection round (1 orig sel, 2 replacement)`), !is.na(`SelNo-NS eplaced`))
+PC_cover <-  PC_cover %>% 
+  filter(!is.na(`Selection round (1 orig sel, 2 replacement)`), !is.na(`SelNo-NS replaced`))
 
 # rerun check1 & check2 to ensure the data was deleted.
 
 
 # checking distribution of scored images over random sample selection along each transect
 
-randSelPoints_byOps <-  ggplot(PC_cover_Anno,
-       aes(x=`SelNo-NS eplaced`,
-           y=`SelNo-NS eplaced`
+randSelPoints_byOps <-  ggplot(PC_cover,
+       aes(x=`SelNo-NS replaced`,
+           y=`SelNo-NS replaced`
        ))+
   geom_point(size=0.5)+
   facet_wrap(~SVY_OPS)+  
@@ -110,12 +112,12 @@ ggsave("figures/randSelPoints_byOps.jpg",
 
 
 # spread the data into a by image matrix formatand adding the 'overview' annotation then export to .csv for taking into QGIS maps
-glimpse(PC_cover_Anno)
+glimpse(PC_cover)
 
-PC_cover_Anno <- ungroup(PC_cover_Anno)   # ensuring that no groupings are left over from previous checks need to reassign!
+PC_cover <- ungroup(PC_cover)   # ensuring that no groupings are left over from previous checks need to reassign!
 
 
-PC_cover_Anno %>% 
+PC_cover %>% 
   select(image_key, L2_Code,PC_cover) %>% 
   spread(image_key, PC_cover)
 
@@ -124,12 +126,12 @@ PC_cover_Anno %>%
 #image with OpCode IN2018_V06_118_NEW need to be kept
 
 
-PC_cover_Anno <- PC_cover_Anno %>% 
+PC_cover <- PC_cover %>% 
   filter(!(image_key=="118_0138" & OpCode=="IN2018_V06_118"))   # this seems to exclude all of each element ...
 
 # check it only removes 3 records then re-run spread but other way round...; 
 #join location info to the by image matrix and export for QGIS mapping
-PCcoverbyImage <- PC_cover_Anno %>% 
+PCcoverbyImage <- PC_cover %>% 
   select(image_key, L2_Code,PC_cover) %>% 
   spread(L2_Code, PC_cover) %>% 
   left_join(AllSTills, by=c("image_key"="KEY"))
@@ -138,7 +140,7 @@ write_csv(PCcoverbyImage, "Results/PCcoverbyImage.csv")
 # NOW THE DATA IS CLEANED UP
 
 # just playing with ggplot - mapping the data in space 
-ggplot(PC_cover_Anno,
+ggplot(PC_cover,
        mapping= aes(x=KF_USBL_LON,
                     y=KF_USBL_LAT,
                     colour=L2_Code)
@@ -161,7 +163,7 @@ ggplot(PC_cover_Anno,
 # commented out because ggplot is not supported - too hard basket for now
 
 # check out the substrate codes that were annotated
-PC_cover_Anno %>% 
+PC_cover %>% 
   group_by(L2_Code) %>% 
   summarise(meanPCcover= mean(PC_cover), n())
 
@@ -186,10 +188,10 @@ SubstSeq <- c('SC-ENLP',
 # summarising the average % of substrate types by transect (OpCode) or by seamount (MapLoc) and checking
 # checking out varaious ways of visualising the data
 
-byOps <- PC_cover_Anno %>% 
+byOps <- PC_cover %>% 
   group_by(MapLoc,OpCode,L2_Code) %>% 
   summarise(meanPCcover= mean(PC_cover), 
-            meanDpth=mean(Z))
+            meanDpth=mean(depth))
 
 # try bar graph - not very infomative            
 ggplot(byOps,
@@ -213,7 +215,7 @@ ggplot(byOps,
 # create the same plot without summarising the data first to look at the dept 
 #distribution of the substrate types
 
-ggplot(PC_cover_Anno,
+ggplot(PC_cover,
        mapping= aes(x=factor(L2_Code, level =SubstSeq),              #call the pre existing vector
                     y=Z)
   )+
@@ -222,7 +224,7 @@ ggplot(PC_cover_Anno,
   theme(axis.text.x = element_text(angle = 90))+   # rotate the label on x-axis
   labs(x="substrate type", y="depth")
 
-subst_depthDist <- ggplot(PC_cover_Anno,
+subst_depthDist <- ggplot(PC_cover,
        mapping= aes(x=factor(L2_Code, level =SubstSeq),              
                     y=Z,
                     size=PC_cover)
@@ -237,7 +239,7 @@ ggsave("figures/subst_depthDist.jpg",
 
 # error message about 240 missing vales - need to check where these are why they are missing...
 # run plot without PC_cover
-ggplot(PC_cover_Anno,
+ggplot(PC_cover,
           mapping= aes(x=factor(L2_Code, level =SubstSeq),              
                        y=Z,
                        )
@@ -254,7 +256,7 @@ PC_cover_Anno %>%
 #FLAG: -- for finalising the data need to update depths in data extract IN2018_V06_AllStills.csv then rerun checks
 
 # creating pie graphs for the distributuion of %cover by substrate types for each location 
-ggplot(PC_cover_Anno,
+ggplot(PC_cover,
           mapping= aes(x="", 
                        y=PC_cover,               
                        fill=factor(L2_Code, level =SubstSeq)
@@ -268,7 +270,7 @@ ggplot(PC_cover_Anno,
 
 # did not work very well - not sur why it has partially empty graphs - try and look at a couple locations separately
 
-Fang <- PC_cover_Anno %>% 
+Fang <- PC_cover %>% 
   filter(MapLoc=="Fang")
 ggplot(Fang,
        mapping= aes(x="", 
@@ -278,7 +280,7 @@ ggplot(Fang,
   geom_bar(stat="identity", width=1)+
   coord_polar("y", start=0)
  
-Pedra <- PC_cover_Anno %>% 
+Pedra <- PC_cover %>% 
   filter(MapLoc=="Pedra")
 ggplot(Pedra,
        mapping= aes(x="", 
@@ -288,7 +290,7 @@ ggplot(Pedra,
   geom_bar(stat="identity", width=1)+
   coord_polar("y", start=0)
 
-z16 <- PC_cover_Anno %>% 
+z16 <- PC_cover %>% 
   filter(MapLoc=="z16")
 ggplot(z16,
        mapping= aes(x="", 
@@ -298,7 +300,7 @@ ggplot(z16,
   geom_bar(stat="identity", width=1)+
   coord_polar("y", start=0)
 
-Hill_U <- PC_cover_Anno %>% 
+Hill_U <- PC_cover %>% 
   filter(MapLoc=="Hill U")
 ggplot(Hill_U,
        mapping= aes(x="", 
@@ -308,7 +310,7 @@ ggplot(Hill_U,
   geom_bar(stat="identity", width=1)+
   coord_polar("y", start=0)
 
-MainMatt <- PC_cover_Anno %>% 
+MainMatt <- PC_cover %>% 
   filter(MapLoc=="Main Matt")
 ggplot(MainMatt,
        mapping= aes(x="", 
