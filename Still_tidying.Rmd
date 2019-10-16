@@ -1,0 +1,15 @@
+---
+title: "IN2018_V06 Still image annotations"
+author: "Franziska Althaus"
+date: "16/10/2019"
+output: html_document
+---
+# Percent cover data from TransectMeasure
+
+## Data format for import
+
+The data comes in from TM bla bla 
+
+An example of the types of images that are being analysed
+
+!["image catption"](figures/FIG2_ImagePlate.png){width=15cm}
