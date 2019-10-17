@@ -23,7 +23,7 @@ TM_data <- TM_data1  %>%
          OpsNo = str_sub(OpCode, start=12, end=14),          # this picks the operation number out ignoring tailing '_NEW'
          ImageNo = str_sub(Filename, start=48, end=51),      # separate the components out
          image_key = paste(OpsNo,"_",ImageNo, sep=""),        #create the image_key
-         ranSel_key = paste(OpsNo,"_",RanSelNo, sep=""))     #create the ransom selection key
+         ranSel_key = paste(OpsNo,"_",RanSelNo, sep=""))     #create the random selection key
   
 
 # filter out the 'overall image scores that should all have a NOTE saying 'user defined' 
@@ -65,6 +65,9 @@ AllSTills <- read_csv("data/IN2018_V06_AllStills.csv")
 
 #check number of rows in percent cover data - ensure number rows stays the same with join below
 nrow(PC_cover_Anno)
+
+# make depth numeric
+
 AllSTills <- AllSTills %>% 
   mutate(depth=as.numeric(Z)) %>% 
   select(-c(Z))
