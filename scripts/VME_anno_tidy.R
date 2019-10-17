@@ -95,7 +95,26 @@ VMEanno_data1 <-  VMEanno_data1 %>%
 
 # rerun check1 & check2 to ensure the data was deleted.
 
+
 # write out data to results for new scipt
 write_csv(VMEanno_data1, "Results/VMEanno_data.csv")
 
 # 
+VMEannoPimageConc <- VMEanno_data1 %>% 
+  group_by(image_key, CONCEPT) %>% 
+  summarise(Count=sum(Count),
+            NoTypes=n())
+#identify where comments need to be looked at to separate concept types
+multi_type <- VMEannoPimageConc %>% 
+  filter(NoTypes>1)
+
+# spread the data into a by image matrix format and adding the geolocation data and export to .csv for taking into QGIS maps
+VMEannoMatrix <- VMEannoPimageConc %>% 
+  select(image_key, CONCEPT,Count) %>% 
+  spread(CONCEPT, Count) %>% 
+  left_join(AllSTills, by=c("image_key"="KEY"))
+write_csv(VMEannoMatrix, "Results/VMEannoMatrix.csv")
+
+
+# NOW THE DATA IS CLEANED UP: start new script using output from here
+# data exploration in script: xxxx
