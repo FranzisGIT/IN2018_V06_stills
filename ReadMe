@@ -14,25 +14,26 @@ The area within quadrats is annotated for (1) percent cover of substrate types w
 and for (2) counts of individuals of indicator taxa for 'VME' (Vulnerable Marie Ecosystems).
 
 Percent Cover annotations:
+  script Tidy_TM_Concat_data.R to tidy up the output from TM
 Annotations for (1) are done in TransectMeasure (TM) software that throws 5 random point per square metre into the quadrat, and each point is given a label that identifies the substrate type.
 Types and coding used: 
-L1_CAT 		L2_CAT														L2_Code
-Biota		Cnidaria - Stony corals - Enalopsammia (live)				SC-ENLP
-			Cnidaria - Stony corals - Solenosmilia (live)				SC-SOL
-			Cnidaria - Stony corals - Madrepora (live)					SC-MAD
+L1_CAT  L2_CAT  L2_Code
+Biota Cnidaria - Stony corals - Enalopsammia (live)	SC-ENLP
+			Cnidaria - Stony corals - Solenosmilia (live)	SC-SOL
+			Cnidaria - Stony corals - Madrepora (live)  SC-MAD
 Substrate	Consolidate - Biogenic - Coral reef - Enalopsammia (dead)	SU-ENLP
 			Consolidate - Biogenic - Coral reef - Solenosmilia (dead)	SU-SOL
-			Consolidate - Biogenic - Coral reef - Madrepoa (dead)		SU-MAD
-			Unconsolidate - Biogenic - Coral Rubble						SU-BCOR
-			Unconsolidate - Biogenic - Barnacle plates					SU-BBAR
-			Unconsolidate - Biogenic - other							SU-BOTH
-			Consolidate - Rock											SU-ROK
-			Consolidate - Boulder										SU-BOL
-			Consolidate - Cobbles										SU-COB
-			Consolidate - Biogenic - other								SU-CONBIO
-			Unconsolidate - Pebble - gravel								SU-PEBGRAV
-			Unconsolidate - Sand/mud									SU-SAMU
-Unscorable	Unscorable													NS
+			Consolidate - Biogenic - Coral reef - Madrepoa (dead)	SU-MAD
+			Unconsolidate - Biogenic - Coral Rubble	SU-BCOR
+			Unconsolidate - Biogenic - Barnacle plates  SU-BBAR
+			Unconsolidate - Biogenic - other  SU-BOTH
+			Consolidate - Rock	SU-ROK
+			Consolidate - Boulder	SU-BOL
+			Consolidate - Cobbles	SU-COB
+			Consolidate - Biogenic - other SU-CONBIO
+			Unconsolidate - Pebble - gravel	SU-PEBGRAV
+			Unconsolidate - Sand/mud  SU-SAMU
+Unscorable	Unscorable  NS
 
 In addition each image has an overview description that is (should be) flagged in the data as 'user defined'
 
@@ -41,5 +42,10 @@ TM raw output data set concatenates point annotations of substrate types within 
  needs to be tidied into a per image % cover for each substrate type
 
 
-(2)	VARS data extract: species counts for the same (or a subset) of these images – again these need to be tidies up before joining them to the image data. – I have not extracted this data set yet as annotations are still ongoing.
+(2)	VARS data extract: species counts for the same (or a subset) of these images – again these need to be tidies up before joining them to the image data. 
+    Script: VME_anno_tidy.R to tidy up the extract from VARS
+    
+create three tibbles - one for the additonal / occational concepts, on for comments and colours, and a data table with the counts recorded. - also added 0 for 'no VME fauna' and 1 for the presence of hydrocorals
+
+
 
