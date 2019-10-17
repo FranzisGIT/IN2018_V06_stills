@@ -45,6 +45,7 @@ VMEanno_comms <- VMEanno_IDs %>%
              CONCEPT=="Rock" |
              CONCEPT=="rubbish"))
 
+# actual numeric data with only the necesary variables in the Tibble...
 VMEanno_data <- VMEanno_IDs %>% 
   filter(!is.na(Count)) %>% 
   select(SURVEY_OPS,
@@ -54,4 +55,47 @@ VMEanno_data <- VMEanno_IDs %>%
          Count,
          )
 
+# for data school the data is located on CSIRO network at: 
+#\fstas1-hba.nexus.csiro.au\CMAR-SHARE\Public\AlthausF\FA_DataSchool_FOCUS-Rawdata" 
 
+AllSTills <- read_csv("data/IN2018_V06_AllStills.csv")
+
+#check number of rows in percent cover data - ensure number rows stays the same with join below
+nrow(PC_cover_Anno)
+
+# make depth numeric
+
+AllSTills <- AllSTills %>% 
+  mutate(depth=as.numeric(Z)) %>% 
+  select(-c(Z))
+
+
+
+# BITS THAT MIGHT BE USEFUL...
+# join image details to the PC cover data, overwriting the previous version
+
+VMEanno_data1 <- left_join(VMEanno_data, AllSTills, by=c("image_key"="KEY"))
+
+# check the data for annotations that are not part of the data annotation plan (there is a number entry in Selection round and SelNo - NS replaced)
+glimpse(VMEanno_data1)
+
+check1 <- VMEanno_data1 %>% 
+  group_by(`Selection round (1 orig sel, 2 replacement)`) %>% 
+  summarise(n())
+
+check2 <- VMEanno_data1 %>% 
+  filter(is.na(`SelNo-NS replaced`))
+
+# CHECK: look at the check1 & check2 file and make sure these are not part of the selection
+# if sure, remove the data entries where `Selection round (1 orig sel, 2 replacement)` or `SelNo-NS eplaced` is NA  
+VMEanno_data1 <-  VMEanno_data1 %>% 
+  filter(!is.na(`Selection round (1 orig sel, 2 replacement)`), 
+         !is.na(`SelNo-NS replaced`),
+         `Selection round (1 orig sel, 2 replacement)`<100)
+
+# rerun check1 & check2 to ensure the data was deleted.
+
+# write out data to results for new scipt
+write_csv(VMEanno_data1, "Results/VMEanno_data.csv")
+
+# 
