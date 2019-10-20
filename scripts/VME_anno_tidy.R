@@ -47,7 +47,12 @@ VMEanno_comms <- VMEanno_IDs %>%
 
 # actual numeric data with only the necesary variables in the Tibble...
 VMEanno_data <- VMEanno_IDs %>% 
-  filter(!is.na(Count)) %>% 
+  filter(!is.na(Count),
+         !(CONCEPT=="fishing gear" |
+             CONCEPT=="gear marks" |
+             CONCEPT=="camera off bottom" |
+             CONCEPT=="Rock" |
+             CONCEPT=="rubbish")) %>% 
   select(SURVEY_OPS,
          image_key,
          ranSel_key,
@@ -86,23 +91,25 @@ check1 <- VMEanno_data1 %>%
 check2 <- VMEanno_data1 %>% 
   filter(is.na(`SelNo-NS replaced`))
 
-# CHECK: look at the check1 & check2 file and make sure these are not part of the selection
-# if sure, remove the data entries where `Selection round (1 orig sel, 2 replacement)` or `SelNo-NS eplaced` is NA  
-VMEanno_data1 <-  VMEanno_data1 %>% 
+#CHECK: look at the check1 & check2 file and make sure these are not part of the selection
+# if sure, remove the data entries where `Selection round (1 orig sel, 2 replacement)` or `SelNo-NS eplaced` is NA  And create new variable converting counts to per metre square density
+VMEanno_data2 <-  VMEanno_data1 %>% 
   filter(!is.na(`Selection round (1 orig sel, 2 replacement)`), 
          !is.na(`SelNo-NS replaced`),
-         `Selection round (1 orig sel, 2 replacement)`<100)
+         `Selection round (1 orig sel, 2 replacement)`<100) %>% 
+  mutate(Dens = Count/`QUAD-Size`)
 
 # rerun check1 & check2 to ensure the data was deleted.
 
 
 # write out data to results for new scipt
-write_csv(VMEanno_data1, "Results/VMEanno_data.csv")
+write_csv(VMEanno_data2, "Results/VMEanno_data.csv")
 
 # 
-VMEannoPimageConc <- VMEanno_data1 %>% 
+VMEannoPimageConc <- VMEanno_data2 %>% 
   group_by(image_key, CONCEPT) %>% 
   summarise(Count=sum(Count),
+            Dens=sum(Dens),
             NoTypes=n())
 #identify where comments need to be looked at to separate concept types
 multi_type <- VMEannoPimageConc %>% 
@@ -110,8 +117,8 @@ multi_type <- VMEannoPimageConc %>%
 
 # spread the data into a by image matrix format and adding the geolocation data and export to .csv for taking into QGIS maps
 VMEannoMatrix <- VMEannoPimageConc %>% 
-  select(image_key, CONCEPT,Count) %>% 
-  spread(CONCEPT, Count) %>% 
+  select(image_key, CONCEPT,Dens) %>% 
+  spread(CONCEPT, Dens ) %>% 
   left_join(AllSTills, by=c("image_key"="KEY"))
 write_csv(VMEannoMatrix, "Results/VMEannoMatrix.csv")
 
