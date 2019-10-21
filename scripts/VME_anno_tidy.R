@@ -97,7 +97,7 @@ VMEanno_data2 <-  VMEanno_data1 %>%
   filter(!is.na(`Selection round (1 orig sel, 2 replacement)`), 
          !is.na(`SelNo-NS replaced`),
          `Selection round (1 orig sel, 2 replacement)`<100) %>% 
-  mutate(Dens = Count/`QUAD-Size`)
+  mutate(Dens = Count/`QUAD-Size`) 
 
 # rerun check1 & check2 to ensure the data was deleted.
 
@@ -119,9 +119,11 @@ multi_type <- VMEannoPimageConc %>%
 VMEannoMatrix <- VMEannoPimageConc %>% 
   select(image_key, CONCEPT,Dens) %>% 
   spread(CONCEPT, Dens ) %>% 
-  left_join(AllSTills, by=c("image_key"="KEY"))
+  left_join(AllSTills, by=c("image_key"="KEY")) %>% 
+
 write_csv(VMEannoMatrix, "Results/VMEannoMatrix.csv")
 
 
 # NOW THE DATA IS CLEANED UP: start new script using output from here
 # data exploration in script: xxxx
+
