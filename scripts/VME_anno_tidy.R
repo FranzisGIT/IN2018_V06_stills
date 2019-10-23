@@ -66,7 +66,7 @@ VMEanno_data <- VMEanno_IDs %>%
 AllSTills <- read_csv("data/IN2018_V06_AllStills.csv")
 
 #check number of rows in percent cover data - ensure number rows stays the same with join below
-nrow(PC_cover_Anno)
+nrow(VMEanno_data)
 
 # make depth numeric
 
@@ -92,21 +92,47 @@ check2 <- VMEanno_data1 %>%
   filter(is.na(`SelNo-NS replaced`))
 
 #CHECK: look at the check1 & check2 file and make sure these are not part of the selection
-# if sure, remove the data entries where `Selection round (1 orig sel, 2 replacement)` or `SelNo-NS eplaced` is NA  And create new variable converting counts to per metre square density
+# if sure, remove the data entries where `Selection round (1 orig sel, 2 replacement)` or `SelNo-NS eplaced` is NA 
+
 VMEanno_data2 <-  VMEanno_data1 %>% 
   filter(!is.na(`Selection round (1 orig sel, 2 replacement)`), 
          !is.na(`SelNo-NS replaced`),
-         `Selection round (1 orig sel, 2 replacement)`<100) %>% 
-  mutate(Dens = Count/`QUAD-Size`) 
+         `Selection round (1 orig sel, 2 replacement)`<100)
+
+#filter out substrate categories where % cover was estimated instead of a count
+
+VMEanno_PCcoral <- VMEanno_data2 %>% 
+  filter(CONCEPT=="Coral reef substrate" |
+         CONCEPT=="Enallopsammia matrix" | 
+         CONCEPT=="Solenosmilia matrix" ) %>% 
+  mutate(PCguess=Count) %>% 
+  select(image_key, CONCEPT, PCguess)
+ 
+
+#use quadrat area to standardise counts to densities (and exclude annotations made for % cover)
+
+VMEanno_Dens <- VMEanno_data2 %>% 
+  filter(CONCEPT !="Coral reef substrate" &
+           CONCEPT !="Enallopsammia matrix" & 
+           CONCEPT !="Solenosmilia matrix" ) %>%   
+    mutate(Dens = Count/`QUAD-Size`) 
 
 # rerun check1 & check2 to ensure the data was deleted.
 
+VMEanno_PCcoral %>% 
+  group_by(CONCEPT) %>% 
+  summarise(n())
 
-# write out data to results for new scipt
-write_csv(VMEanno_data2, "Results/VMEanno_data.csv")
+VMEanno_Dens %>% 
+  group_by(CONCEPT) %>% 
+  summarise(n())
+
+
+# write out data to results for new scipt commented out - need more manipulation first
+#write_csv(VMEanno_data2, "Results/VMEanno_data.csv")
 
 # 
-VMEannoPimageConc <- VMEanno_data2 %>% 
+VMEannoPimageConc <- VMEanno_Dens %>% 
   group_by(image_key, CONCEPT) %>% 
   summarise(Count=sum(Count),
             Dens=sum(Dens),
@@ -116,11 +142,19 @@ multi_type <- VMEannoPimageConc %>%
   filter(NoTypes>1)
 
 # spread the data into a by image matrix format and adding the geolocation data and export to .csv for taking into QGIS maps
-VMEannoMatrix <- VMEannoPimageConc %>% 
+t1 <- VMEannoPimageConc %>% 
   select(image_key, CONCEPT,Dens) %>% 
-  spread(CONCEPT, Dens ) %>% 
-  left_join(AllSTills, by=c("image_key"="KEY")) %>% 
+  spread(CONCEPT, Dens) %>% 
+  left_join(AllSTills, by=c("image_key"="KEY"))
+t2 <- VMEanno_PCcoral %>% 
+  spread(CONCEPT, PCguess) %>% 
+  transmute(`Coral reef substrate` = PC_Sub_CoralReef,
+            `Enallopsammia matrix` = PC_EnallopMatrix,
+            `Solenosmilia matrix` = PC_SolMatrix)             # need to clean up data at input end 2 duplicate rec & 3x duplication of data enntry
 
+
+ 
+  
 write_csv(VMEannoMatrix, "Results/VMEannoMatrix.csv")
 
 
