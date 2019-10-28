@@ -1,7 +1,7 @@
 # tidying up VME fauna anotations extract from ORACLE BHIMAGE -- extract created using VARS_2018-StillsAnnoExtracts.sql
 # 
 library(tidyverse)
-VMEanno_raw <- read_csv("data/IN2018_V06_STILLS_VME_20190717.csv", na = c("(null)", "NA"))
+VMEanno_raw <- read_csv("data/IN2018_V06_STILLS_VME_20191028.csv", na = c("(null)", "NA"))
 
 # tidy up the CNT column first make No VME fauna a zero and Hydrocorals 1 (presence) then
 # convert numeric values to numbers in new variable so only the counts are stored  
@@ -150,10 +150,10 @@ t1 <- VMEannoPimageConc %>%
  
 
 t2 <- VMEanno_PCcoral %>% 
-  spread(CONCEPT, PCguess) %>% 
-  transmute(`Coral reef substrate` = PC_Sub_CoralReef,
-            `Enallopsammia matrix` = PC_EnallopMatrix,
-            `Solenosmilia matrix` = PC_SolMatrix)             # need to clean up data at input end 2 duplicate rec & 3x duplication of data enntry
+  spread(image_key, CONCEPT, PCguess) %>% 
+  transmute(PC_Sub_CoralReef = `Coral reef substrate`,
+            PC_EnallopMatrix = `Enallopsammia matrix`,
+            PC_SolMatrix =`Solenosmilia matrix`)             # need to clean up data at input end 2 duplicate rec & 3x duplication of data enntry
 
 # create data matrix of densities and percnt cover per image and replacng NA's with 0 for the measurements, export data as csv for input into QGIS
 
