@@ -142,18 +142,41 @@ multi_type <- VMEannoPimageConc %>%
   filter(NoTypes>1)
 
 # spread the data into a by image matrix format and adding the geolocation data and export to .csv for taking into QGIS maps
+#NOTE if error occurs at this step check the raw data records that caused it - e.g. duplicate data entry with same/different values - correct data enry at VARS end and re-extract
 t1 <- VMEannoPimageConc %>% 
   select(image_key, CONCEPT,Dens) %>% 
   spread(CONCEPT, Dens) %>% 
-  left_join(AllSTills, by=c("image_key"="KEY"))
+  left_join(AllSTills, by=c("image_key"="KEY")) 
+ 
+
 t2 <- VMEanno_PCcoral %>% 
   spread(CONCEPT, PCguess) %>% 
   transmute(`Coral reef substrate` = PC_Sub_CoralReef,
             `Enallopsammia matrix` = PC_EnallopMatrix,
             `Solenosmilia matrix` = PC_SolMatrix)             # need to clean up data at input end 2 duplicate rec & 3x duplication of data enntry
 
+# create data matrix of densities and percnt cover per image and replacng NA's with 0 for the measurements, export data as csv for input into QGIS
 
- 
+VMEannoMatrix <- left_join(t2, t1, by=c("image_key"="image_key")) %>% 
+  replace_na(list(`Black & Octocorals` = 0,
+                  `Brisingid` = 0,
+                  `D.horridus` = 0,
+                  `Enallopsammia` = 0,
+                  `Hydrocorals` = 0,
+                  `Hydrocorals: Branching` = 0,
+                  `Irregular urchins` = 0,
+                  `Madrepora` = 0,
+                  `No-VMEfauna` = 0,
+                  `Regular urchins` = 0,
+                  `S.variabilis` = 0,
+                  `Sponges` = 0,
+                  `Stalked crinoids` = 0,
+                  `Stony corals` = 0,
+                  `True anemones: Fourlobed` = 0,
+                  `Unstalked crinoids` = 0,
+                  PC_Sub_CoralReef = 0,
+                  PC_EnallopMatrix = 0,
+                  PC_SolMatrix = 0))
   
 write_csv(VMEannoMatrix, "Results/VMEannoMatrix.csv")
 
