@@ -150,8 +150,10 @@ t1 <- VMEannoPimageConc %>%
  
 
 t2 <- VMEanno_PCcoral %>% 
-  spread(image_key, CONCEPT, PCguess) %>% 
-  transmute(PC_Sub_CoralReef = `Coral reef substrate`,
+ # select(image_key, CONCEPT, PCguess) %>% 
+  spread(CONCEPT, PCguess) %>% 
+  transmute(image_key = image_key,
+            PC_Sub_CoralReef = `Coral reef substrate`,
             PC_EnallopMatrix = `Enallopsammia matrix`,
             PC_SolMatrix =`Solenosmilia matrix`)             # need to clean up data at input end 2 duplicate rec & 3x duplication of data enntry
 
