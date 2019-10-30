@@ -145,6 +145,6 @@ write_csv(PC_cover, "Results/PCcover.csv")
 
 
 # NOW THE DATA IS CLEANED UP: start new script using output from here
-# data exploration in script: PC_coverExplore
+# data exploration in script: PC_coverExplore.R
 
 
