@@ -129,7 +129,7 @@ VMEanno_Dens %>%
 
 
 # write out data to results for new scipt commented out - need more manipulation first
-#write_csv(VMEanno_data2, "Results/VMEanno_data.csv")
+
 
 # 
 VMEannoPimageConc <- VMEanno_Dens %>% 
@@ -140,10 +140,6 @@ VMEannoPimageConc <- VMEanno_Dens %>%
 #identify where comments need to be looked at to separate concept types
 multi_type <- VMEannoPimageConc %>% 
   filter(NoTypes>1)
-
-# write out PCcover and Dens data (without qualifiers on concepts) to results folder for use in new script
-write_csv(VMEannoPimageConc, "Results/VMEanno_DensQ.csv")
-write_csv(VMEanno_PCcoral, "Results/VMEanno_PCcoral.csv")
 
 # spread the data into a by image matrix format and adding the geolocation data and export to .csv for taking into QGIS maps
 #NOTE if error occurs at this step check the raw data records that caused it - e.g. duplicate data entry with same/different values - correct data enry at VARS end and re-extract
@@ -185,6 +181,18 @@ VMEannoMatrix <- left_join(t2, t1, by=c("image_key"="image_key")) %>%
                   PC_SolMatrix = 0))
   
 write_csv(VMEannoMatrix, "Results/VMEannoMatrix.csv")
+
+
+# write out PCcover and Dens data (without qualifiers on concepts) to results folder for use in new script
+# but add essential grouping variables from Stills
+
+VMEannoPimageConc %>%
+  left_join(AllSTills, by=c("image_key"="KEY")) #%>% 
+  write_csv( "Results/VMEanno_DensQ.csv")
+
+VMEanno_PCcoral %>% 
+  left_join(AllSTills, by=c("image_key"="KEY")) %>% 
+  write_csv("Results/VMEanno_PCcoral.csv")
 
 # NOW THE DATA IS CLEANED UP: start new script using output from here
 # data exploration in script togeter with PCcover data: PC_coverExplore.R
