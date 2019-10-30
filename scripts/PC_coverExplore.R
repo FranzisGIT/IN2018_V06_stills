@@ -2,6 +2,7 @@
 # the TM output data (script: Tidy_TM_Concat_data.R)
 
 library(tidyverse)
+
 PCcoverbyImage <- read_csv("Results/PCcoverbyImage.csv")
 
 PC_cover <- read_csv("Results/PCcover.csv")
@@ -96,13 +97,15 @@ ggplot(PC_cover,
 
 subst_depthDist <- ggplot(PC_cover,
                           mapping= aes(x=factor(L2_Code, level =SubstSeq),              
-                                       y=Z,
+                                       y=depth,
                                        size=PC_cover)
 )+
   geom_point(alpha=0.2)+
   scale_y_reverse() +                            # reverse y-axis because it represents ocean depth 
   theme(axis.text.x = element_text(angle = 90))+   # rotate the label on x-axis
   labs(x="substrate type", y="depth")
+
+subst_depthDist
 ggsave("figures/subst_depthDist.jpg", 
        plot=subst_depthDist, 
        dpi=600)
@@ -120,8 +123,8 @@ ggplot(PC_cover,
   labs(x="substrate type", y="depth")
 
 # still 240 missing - missing depths? 
-PC_cover_Anno %>% 
-  filter(is.na(Z))
+PC_cover %>% 
+  filter(is.na(depth))
 
 #FLAG: -- for finalising the data need to update depths in data extract IN2018_V06_AllStills.csv then rerun checks
 
@@ -141,54 +144,59 @@ ggplot(PC_cover,
 # did not work very well - not sur why it has partially empty graphs - try and look at a couple locations separately
 
 Fang <- PC_cover %>% 
-  filter(MapLoc=="Fang")
-ggplot(Fang,
+  filter(MapLoc=="Fang") %>% 
+  ggplot(Fang,
        mapping= aes(x="", 
                     y=PC_cover,               
                     fill=factor(L2_Code, level =SubstSeq)
        ))+
-  geom_bar(stat="identity", width=1)+
-  coord_polar("y", start=0)
+    geom_bar(stat="identity", width=1)+
+    coord_polar("y", start=0)
+Fang
 
 Pedra <- PC_cover %>% 
-  filter(MapLoc=="Pedra")
-ggplot(Pedra,
+  filter(MapLoc=="Pedra") %>% 
+  ggplot(Pedra,
        mapping= aes(x="", 
                     y=PC_cover,               
                     fill=factor(L2_Code, level =SubstSeq)
        ))+
-  geom_bar(stat="identity", width=1)+
-  coord_polar("y", start=0)
+    geom_bar(stat="identity", width=1)+
+    coord_polar("y", start=0)
+Pedra
 
 z16 <- PC_cover %>% 
-  filter(MapLoc=="z16")
-ggplot(z16,
+  filter(MapLoc=="z16") %>% 
+  ggplot(z16,
        mapping= aes(x="", 
                     y=PC_cover,               
                     fill=factor(L2_Code, level =SubstSeq)
        ))+
-  geom_bar(stat="identity", width=1)+
-  coord_polar("y", start=0)
+   geom_bar(stat="identity", width=1)+
+   coord_polar("y", start=0)
 
 Hill_U <- PC_cover %>% 
-  filter(MapLoc=="Hill U")
-ggplot(Hill_U,
+  filter(MapLoc=="Hill U") %>% 
+  ggplot(Hill_U,
        mapping= aes(x="", 
                     y=PC_cover,               
                     fill=factor(L2_Code, level =SubstSeq)
        ))+
-  geom_bar(stat="identity", width=1)+
-  coord_polar("y", start=0)
+   geom_bar(stat="identity", width=1)+
+   coord_polar("y", start=0)
+
 
 MainMatt <- PC_cover %>% 
-  filter(MapLoc=="Main Matt")
-ggplot(MainMatt,
+  filter(MapLoc=="Main Matt") %>% 
+  ggplot(MainMatt,
        mapping= aes(x="", 
                     y=PC_cover,               
                     fill=factor(L2_Code, level =SubstSeq)
        ))+
-  geom_bar(stat="identity", width=1)+
-  coord_polar("y", start=0)
+    geom_bar(stat="identity", width=1)+
+   coord_polar("y", start=0)
+MainMatt
+
 
 
   
