@@ -187,7 +187,7 @@ write_csv(VMEannoMatrix, "Results/VMEannoMatrix.csv")
 # but add essential grouping variables from Stills
 
 VMEannoPimageConc %>%
-  left_join(AllSTills, by=c("image_key"="KEY")) #%>% 
+  left_join(AllSTills, by=c("image_key"="KEY"))%>% 
   write_csv( "Results/VMEanno_DensQ.csv")
 
 VMEanno_PCcoral %>% 

@@ -204,11 +204,15 @@ comboPlot1
 
 ## these are all interesting but not especially useful
 
-VMEanno_DensQ %>% 
+# looking at the distribution of density and number of taxa over the whole data set
+VME_TotDens <- VMEanno_DensQ %>% 
   group_by(image_key, SVY_OPS, MapLoc, depth) %>% 
   summarise(TotDens=sum(Dens),
             noTaxa=sum(NoTypes))
+VME_TotDens %>% 
+  ggplot(aes(x=TotDens))+
+  geom_histogram()
 
-
-
-  
+VME_TotDens %>% 
+  ggplot(aes(x=noTaxa))+
+  geom_histogram()  
