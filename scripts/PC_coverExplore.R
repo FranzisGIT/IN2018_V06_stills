@@ -4,10 +4,11 @@
 library(tidyverse)
 
 PCcoverbyImage <- read_csv("Results/PCcoverbyImage.csv")
-
 PC_cover <- read_csv("Results/PCcover.csv")
 
-
+VMEanno_DensQ <- read_csv("Results/VMEanno_DensQ.csv")
+VMEanno_PCcoral <- read_csv("Results/VMEanno_PCcoral.csv")
+VMEannoMatrix <- read_csv("Results/VMEannoMatrix.csv")
 
 # just playing with ggplot - mapping the data in space 
 
@@ -88,7 +89,7 @@ ggplot(byOps,
 
 ggplot(PC_cover,
        mapping= aes(x=factor(L2_Code, level =SubstSeq),              #call the pre existing vector
-                    y=Z)
+                    y=depth)
 )+
   geom_point()+
   scale_y_reverse() +                            # reverse y-axis because it represents ocean depth 
@@ -114,7 +115,7 @@ ggsave("figures/subst_depthDist.jpg",
 # run plot without PC_cover
 ggplot(PC_cover,
        mapping= aes(x=factor(L2_Code, level =SubstSeq),              
-                    y=Z,
+                    y=depth,
        )
 )+
   geom_point(alpha=0.2)+
@@ -184,7 +185,7 @@ Hill_U <- PC_cover %>%
        ))+
    geom_bar(stat="identity", width=1)+
    coord_polar("y", start=0)
-
+Hill_U
 
 MainMatt <- PC_cover %>% 
   filter(MapLoc=="Main Matt") %>% 
@@ -196,6 +197,17 @@ MainMatt <- PC_cover %>%
     geom_bar(stat="identity", width=1)+
    coord_polar("y", start=0)
 MainMatt
+
+library(cowplot)
+comboPlot1 <- plot_grid(Pedra,z16, Hill_U, MainMatt, Fang,ncol = 2)
+comboPlot1
+
+## these are all interesting but not especially useful
+
+VMEanno_DensQ %>% 
+  group_by(image_key, SVY_OPS, MapLoc, depth) %>% 
+  summarise(TotDens=sum(Dens),
+            noTaxa=sum(NoTypes))
 
 
 
