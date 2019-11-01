@@ -1,0 +1,129 @@
+---
+title: "Stills Annotations - Data summaries and exploration"
+author: "Franziska Althaus"
+date: "01/11/2019"
+output: 
+  html_document:
+      toc: TRUE
+      toc_float: TRUE
+      code_folding: hide
+      theme: "journal"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+
+library(tidyverse)
+library(cowplot)
+```
+
+# Background
+
+A survey of the seamounts south of Tasmania on board of the Australian Marine National Facility Vessel Investigator imagery of the seafloor was collected on transects using a towed camera system.
+The imagery consist of Video and stereo still images. The data is structured into seamounts (Map Locations), transects (operations) and images that are geolocated in space. A selection of the stereo stills are processed to generate a quadrat of measured size overlaid on the image. The area within quadrats is annotated for (1) percent cover of substrate types with the matrix-forming coral (esp. _Solenosmilia variabilis_) being of particular interest, and for (2) counts of individuals of indicator taxa for 'VME' (Vulnerable Marie Ecosystems).
+
+# Image annotations
+
+## 1. Percent cover annotations
+
+Percent cover of substrate types is annotated using a point count approach in TransectMeasure software from [SEAGIS](https://www.seagis.com.au/). Random points at a density of 5 points.m^-2^) were thrown into the measured quadrat and annotated for 16 categories, including 3 matrix-forming coral species distinguished into live vs. dead, 4 other biogenic substrates, 5 non-biogenic substrate types and a not-scorable' category where no category could be assigned due to image limitation or obstruction by mobile fauna. The CATAMI classification ([Althaus et al. 2015](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0141039)) was used to define the substrate categories. Descriptive codes were used for each category for ease of data manipulation.In addition to the annotations of the random points an overall classification of the whole quadrat was applied to capture the overall impression, especially with regard to potential past fishing impact.
+
+Codes and descriptions of the point categories used: 
+
+* SC-ENLP: Cnidaria - Stony corals - Enalopsammia (live)
+* SC-SOL: Cnidaria - Stony corals - Solenosmilia (live)
+* SC-MAD: Cnidaria - Stony corals - Madrepora (live)
+* SU-ENLP: Cnidaria - Stony corals - Enalopsammia (dead)
+* SU-SOL: Cnidaria - Stony corals - Solenosmilia (dead)
+* SU-MAD: Cnidaria - Stony corals - Madrepora (dead)
+* SU-BCOR: Unconsolidate - Biogenic - Coral Rubble 
+* SU-BBAR: Unconsolidate - Biogenic - Barnacle plates
+* SU-BOTH: Unconsolidate - Biogenic - other
+* SU-CONBIO: Consolidate - Biogenic - other (note this substrate types was not consistentlly recorded combine with xxx)
+* SU-ROK: Consolidate - Rock
+* SU-BOL: Consolidate - Boulder
+* SU-COB: Consolidate - Cobbles
+* SU-PEBGRAV: Unconsolidate - Pebble - gravel
+* SU-SAMU: Unconsolidate - Sand/mud
+* NS: Unscorable
+
+## 2. VME taxa counts
+
+Counts of indicator taxa for vulnerable marine ecosystems (VME) are made within each quadrat, allowing for calculating standardised densities per square metre. In addition, by-eye estimated of the percent cover of coral matrix (dead & alive combined) are recorded for the three types of matrix forming coral distinguished for percent cover annotations, in order to compare percent cover from point counts and estimates. Annotations are made in the CSIRO insidence of the MBARI developed Video Annotation and Registration System ([VARS](http://vars.it.csiro.au/)). The VME taxa targetted are listed below. Again, the CATAMI classification ([Althaus et al. 2015](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0141039)) was used to classify the taxa. The comments field in VARS is used to record counts and to record additional modifyiers such as colour of distinctive taxa within some of the VME taxon groups (e.g. yellow and brown stalked crinoids were distinguished). An additional category of 'No-VMEfauna' was added to indicate that an image was annotated but none of the taxa of interest were observed. 
+
+VME taxa targetted:
+
+* Sponges
+* Stony corals: Branching: _S.variabilis_
+* Stony corals: Branching: _Enalopsammia_
+* Stony corals: Branching: _Madrepora_
+* stony corals (other)
+* Black & Octocorals
+* Stalked crinoids
+* Unstalked crinoid
+* Brisingid
+* True Anemones: Fourlobed
+* Hydrocorals: Branching
+* Hydrocorals (presence only recorded)
+
+Additional taxa of interest:
+
+* Regular urchins
+* _Dermechinus horridus_ (a regular urchin)
+* Irregular urchins
+
+Percent cover of matrix forming coral (dead & alive), by-eye estimate:
+
+* PC_Sub_CoralReef:  Coral reef species undetermined
+* PC_Cub_EnallopMatrix: _Enallopsammia_ matrix
+* PC_Sub_SolMatrix: _Solenosmilia_ matrix
+
+
+# Data preparation and cleaning
+
+## 1. Percent cover data
+
+The TM raw output data set is a concatenation of all TM project outputs. Each of the output files consist of the point annotations within images and the 'user defined' point annotation for the entire image. The raw data extract is tidied up using the separate R script **Tidy_TM_Concat_data.R**. This separates the raw data into overview annotations and point annotations and transformed into percent cover by substrate category for each image. Then the latter are linked to image geolocation information and written out to .cvs as column-format data (PCcover.csv) and as matrix format (PCcoverbyImage.csv), for use in further analyses and for mapping in QGIS.
+
+Note, at this stage the overview annotations were separated out from percent cover data but are not furher cleand or considered.
+
+## 2. VME taxa counts
+
+The VME taxon counts are extracted from the VARS Oracle data base using the script **VARS_2018-StillsAnnoExtracts.sql**. The raw data extract is tidied up using the separate R script **VME_anno_tidy.R**. The non-numrical comments are separated from the counts and percent covers; these are currently not further used. The numeric data is split into percent cover data and the counts. The latter are linked to the quadrat sizes and converted to densities (ind.m^-2^). each of the tables is linked to image geolocation information and written out to .cvs as column-format data (VMEanno_PCcoral.csv and VMEanno_DensQ.csv) and combined as matrix format (VMEannoMatrix.csv), for use in further analyses and for mapping in QGIS.
+
+Note, at this stage the modifyiers (colour, etc) are not incorporated into the output data.
+    
+# Data exploration
+
+Inital data summaries and plots based on the five .csv files written out by the data cleaning process. 
+
+```{r data loading}
+
+PCcoverbyImage <- read_csv("Results/PCcoverbyImage.csv")
+PC_cover <- read_csv("Results/PCcover.csv")
+
+VMEanno_DensQ <- read_csv("Results/VMEanno_DensQ.csv")
+VMEanno_PCcoral <- read_csv("Results/VMEanno_PCcoral.csv")
+VMEannoMatrix <- read_csv("Results/VMEannoMatrix.csv")
+
+```
+
+
+
+
+-------------------------------------------------
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
