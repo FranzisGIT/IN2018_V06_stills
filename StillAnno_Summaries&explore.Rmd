@@ -11,16 +11,19 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 library(tidyverse)
 library(cowplot)
+library(knitr)
 ```
 
 # Background
 
 A survey of the seamounts south of Tasmania on board of the Australian Marine National Facility Vessel Investigator imagery of the seafloor was collected on transects using a towed camera system.
-The imagery consist of Video and stereo still images. The data is structured into seamounts (Map Locations), transects (operations) and images that are geolocated in space. A selection of the stereo stills are processed to generate a quadrat of measured size overlaid on the image. The area within quadrats is annotated for (1) percent cover of substrate types with the matrix-forming coral (esp. _Solenosmilia variabilis_) being of particular interest, and for (2) counts of individuals of indicator taxa for 'VME' (Vulnerable Marie Ecosystems).
+The imagery consist of Video and stereo still images. The data is structured into seamounts (Map Locations), transects (operations) and images that are geolocated in space. A selection of the stereo stills are processed to generate a quadrat of measured size overlaid on the image. The area within quadrats is annotated for (1) percent cover of substrate types with the matrix-forming coral (esp. _Solenosmilia variabilis_) being of particular interest, and for (2) counts of individuals of indicator taxa for 'VME' (Vulnerable Marine Ecosystems).
+
+![**Plate 1** Example images of the habitats](figures/FIG2_ImagePlate.png){width=15cm}
 
 # Image annotations
 
@@ -95,9 +98,14 @@ Note, at this stage the modifyiers (colour, etc) are not incorporated into the o
     
 # Data exploration
 
-Inital data summaries and plots based on the five .csv files written out by the data cleaning process. 
+Inital data summaries and plots based on the by image operations details and the five .csv files written out by the data cleaning process. 
 
 ```{r data loading}
+# read all stills data and make depth numeric
+
+AllSTills <- read_csv("data/IN2018_V06_AllStills.csv") %>% 
+  mutate(depth=as.numeric(Z)) %>% 
+  select(-c(Z))
 
 PCcoverbyImage <- read_csv("Results/PCcoverbyImage.csv")
 PC_cover <- read_csv("Results/PCcover.csv")
@@ -106,24 +114,171 @@ VMEanno_DensQ <- read_csv("Results/VMEanno_DensQ.csv")
 VMEanno_PCcoral <- read_csv("Results/VMEanno_PCcoral.csv")
 VMEannoMatrix <- read_csv("Results/VMEannoMatrix.csv")
 
+nTarget <- summarise(AllSTills, sum(`Target RANSMPL (1/10)`))
+#tried to call this in text xxx with `r view(nTarget)` but doesn't work
+```
+
+In total xxx images were targeted for annotation, of these `r nrow(PCcoverbyImage)` have been annotated for percent cover of substrate types, `r nrow(VMEannoMatrix)` have been annotated for VME taxa and zzz were identified as unsuitable for annotation and could not be replaced. Summary of the number of images targeted for stills analyses and the number of images annotated for percent cover and for VME taxa. (NOTE need to exclude operations that were not targeted from this summary)
+
+```{r Ops summaries}
+PC_done <- PCcoverbyImage %>% 
+  group_by(SVY_OPS) %>% 
+  summarise(PCdone=n())
+
+VME_done <- VMEannoMatrix %>% 
+  group_by(SVY_OPS) %>% 
+  summarise(VMEdone=n())
+
+## NOTE will need to limit the data here to target ops only
+Target <- AllSTills %>% 
+  group_by(SVY_OPS, MapLoc, `Target RANSMPL (1/10)`) %>% 
+  summarise(RandSelection=n()) %>% 
+  left_join(PC_done, by=c("SVY_OPS"="SVY_OPS")) %>% 
+  left_join(VME_done, by=c("SVY_OPS"="SVY_OPS"))
+
+kable(Target[1:6], caption="**Table 1** By operation processing summary")
+
+```
+
+## 1. Percent cover
+
+In total there are `r nrow(PCcoverbyImage)` randomly selected images have been annotated for percent cover to date. In total `r nrow(PC_done)` operations have been (at least partially) annotated.  
+
+Below is a summary of the data distribution across the targeted substrate types
+
+```{r PCcover sumaries }
+
+# check out the substrate codes that were annotated
+
+PCsum <- PC_cover %>% 
+  group_by(L2_Code) %>% 
+  summarise(meanPCcover= mean(PC_cover), PresNo_Images = n())
+
+kable(PCsum [1:3], caption="**Table 2** Summary of the data distribution across the targeted substrate types")
+
+```
+
+The depth distribution of the live and dead coral matrix are of particular interest in looking at the depth distribution of the substrate types. 
+
+```{r by depth distribution, fig.cap="**Figure 1** depth distribution of substrate types"}
+#distribution of the substrate types
+# create a vector with the sequence of the substrate types for ordering them in a meaningful way
+SubstSeq <- c('SC-ENLP',
+              'SU-ENLP',
+              'SC-SOL',
+              'SU-SOL',
+              'SC-MAD',
+              'SU-MAD',
+              'SU-BCOR',
+              'SU-BBAR',
+              'SU-BOTH',
+              'SU-ROK',
+              'SU-BOL',
+              'SU-COB',
+              'SU-CONBIO',
+              'SU-PEBGRAV',
+              'SU-SAMU',
+              'NS')
+ggplot(PC_cover,
+       mapping= aes(x=factor(L2_Code, level =SubstSeq),              #call the pre existing vector
+                    y=depth,
+                    size=PC_cover)
+  )+
+  geom_point(alpha=0.2)+
+  scale_y_reverse() +                            # reverse y-axis because it represents ocean depth 
+  theme(axis.text.x = element_text(angle = 90))+   # rotate the label on x-axis
+  labs(x="substrate type", y="depth")
+
+```
+
+Distribution of the substrate types by selected locations  
+
+```{r PC cover pies, fig.cap="**Figure 2** pie charts of substrate distribution at selected locations"}
+Fang <- PC_cover %>% 
+  filter(MapLoc=="Fang") %>% 
+  ggplot(Fang,
+       mapping= aes(x="", 
+                    y=PC_cover,               
+                    fill=factor(L2_Code, level =SubstSeq)
+       ))+
+    geom_bar(stat="identity", width=1)+
+    ggtitle("Fang")+
+    coord_polar("y", start=0)
+Fang
+
+MainMatt <- PC_cover %>% 
+  filter(MapLoc=="Main Matt") %>% 
+  ggplot(MainMatt,
+       mapping= aes(x="", 
+                    y=PC_cover,               
+                    fill=factor(L2_Code, level =SubstSeq)
+       ))+
+    geom_bar(stat="identity", width=1)+
+      ggtitle("MainMatt")+
+   coord_polar("y", start=0)
+MainMatt
+
+Pedra <- PC_cover %>% 
+  filter(MapLoc=="Pedra") %>% 
+  ggplot(Pedra,
+       mapping= aes(x="", 
+                    y=PC_cover,               
+                    fill=factor(L2_Code, level =SubstSeq)
+       ))+
+    geom_bar(stat="identity", width=1)+
+      ggtitle("Pedra")+
+    coord_polar("y", start=0)
+Pedra
+
+Sisters <- PC_cover %>% 
+  filter(MapLoc=="Sisters") %>% 
+  ggplot(MainMatt,
+       mapping= aes(x="", 
+                    y=PC_cover,               
+                    fill=factor(L2_Code, level =SubstSeq)
+       ))+
+    geom_bar(stat="identity", width=1)+
+      ggtitle("Sisters")+
+   coord_polar("y", start=0)
+Sisters
+
+z16 <- PC_cover %>% 
+  filter(MapLoc=="z16") %>% 
+  ggplot(z16,
+       mapping= aes(x="", 
+                    y=PC_cover,               
+                    fill=factor(L2_Code, level =SubstSeq)
+       ))+
+   geom_bar(stat="identity", width=1)+
+      ggtitle("z16")+
+   coord_polar("y", start=0)
+z16
+
+Hill_U <- PC_cover %>% 
+  filter(MapLoc=="Hill U") %>% 
+  ggplot(Hill_U,
+       mapping= aes(x="", 
+                    y=PC_cover,               
+                    fill=factor(L2_Code, level =SubstSeq)
+       ))+
+   geom_bar(stat="identity", width=1)+
+      ggtitle("Hill_U")+
+   coord_polar("y", start=0)
+Hill_U
+
+Hill_K1 <- PC_cover %>% 
+  filter(MapLoc=="Hill K1") %>% 
+  ggplot(Hill_U,
+       mapping= aes(x="", 
+                    y=PC_cover,               
+                    fill=factor(L2_Code, level =SubstSeq)
+       ))+
+   geom_bar(stat="identity", width=1)+
+      ggtitle("Hill_K1")+
+   coord_polar("y", start=0)
+Hill_K1
+
 ```
 
 
 
-
--------------------------------------------------
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
