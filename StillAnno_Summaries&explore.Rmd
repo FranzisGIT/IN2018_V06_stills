@@ -280,5 +280,21 @@ Hill_K1
 
 ```
 
+Looking at the distribution of coral matrix formed by _Solenosmilia_ (SC_SOL and SU_SOL) and coral rubble (SU_BCOR) in more detail, particularly by depth and location. 
+
+```{r SV data}
+CoralPC <- PC_cover %>% 
+  filter(L2_Code == "SC-SOL" |
+         L2_Code == "SU-SOL" |
+         L2_Code == "SU-BCOR")
+CoralPC
+
+CoralPC %>% 
+  ggplot(aes(x = PC_cover)) +
+  facet_wrap(~ L2_Code) +
+  geom_histogram()
+
+```
+
 
 
