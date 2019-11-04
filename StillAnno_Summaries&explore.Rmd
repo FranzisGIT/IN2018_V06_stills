@@ -139,6 +139,17 @@ Target <- AllSTills %>%
 kable(Target[1:6], caption="**Table 1** By operation processing summary")
 
 ```
+The depth distribution of the data set 
+
+```{r DataDepth, fig.cap = "depth distribution of the annotated imagery"}
+
+PCcoverbyImage %>% 
+  ggplot(aes(x = depth)) +
+  facet_wrap(~ MapLoc) +
+  geom_histogram(bins=10)
+
+```
+
 
 ## 1. Percent cover
 
@@ -160,7 +171,7 @@ kable(PCsum [1:3], caption="**Table 2** Summary of the data distribution across 
 
 The depth distribution of the live and dead coral matrix are of particular interest in looking at the depth distribution of the substrate types. 
 
-```{r by depth distribution, fig.cap="**Figure 1** depth distribution of substrate types"}
+```{r by depth distribution, fig.cap="**Figure 1** depth distribution of substrate types summary graph"}
 #distribution of the substrate types
 # create a vector with the sequence of the substrate types for ordering them in a meaningful way
 SubstSeq <- c('SC-ENLP',
@@ -191,9 +202,21 @@ ggplot(PC_cover,
 
 ```
 
-Distribution of the substrate types by selected locations  
+Coral rubble appears to have quite a high concentratio in the shallowest depths, scattering the raw data may make this easier to see:
 
-```{r PC cover pies, fig.cap="**Figure 2** pie charts of substrate distribution at selected locations"}
+```{r SV data depth, fig.cap="**Figure 2** depth distribution of substrate types"}
+PC_cover %>% 
+  ggplot(aes(x = depth,
+             y = PC_cover))+
+  geom_point(alpha=0.2)+
+  facet_wrap(~L2_Code)
+
+```
+
+
+Distribution of the substrate types by selected locations - here the seamounts from the recovery time series are selected. 
+
+```{r PC cover pies, fig.cap="**Figure 3** pie charts of substrate distribution at selected locations"}
 Fang <- PC_cover %>% 
   filter(MapLoc=="Fang") %>% 
   ggplot(Fang,
@@ -280,19 +303,31 @@ Hill_K1
 
 ```
 
-Looking at the distribution of coral matrix formed by _Solenosmilia_ (SC_SOL and SU_SOL) and coral rubble (SU_BCOR) in more detail, particularly by depth and location. 
+Figure 2 above shows a relatively narrow depth band where _Solenosmilia_ (particulaly live coral) is observed, and a surprisingly high contribution of coral rubble in the shallowest images. Looking at the distribution of coral matrix formed by _Solenosmilia_ (SC_SOL and SU_SOL) and coral rubble (SU_BCOR) in more detail, particularly by depth and location. 
 
-```{r SV data}
+```{r SV data histogram, fig.cap="**Figure 4** Frequency distrbution histograms of % cover recorded for coral matrix and rubble"}
 CoralPC <- PC_cover %>% 
   filter(L2_Code == "SC-SOL" |
          L2_Code == "SU-SOL" |
          L2_Code == "SU-BCOR")
-CoralPC
 
 CoralPC %>% 
   ggplot(aes(x = PC_cover)) +
   facet_wrap(~ L2_Code) +
   geom_histogram()
+
+```
+
+Just concentrating on the Coral rubble, why is there a high proportion of rubble in shallow sites
+
+```{r rubble checks}
+PC_cover %>% 
+  filter(L2_Code == "SU-BCOR") %>% 
+  ggplot(aes(x = depth,
+             y = PC_cover))+
+  geom_point(alpha=0.2)+
+  facet_wrap(~MapLoc)
+
 
 ```
 
