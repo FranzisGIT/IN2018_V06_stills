@@ -1,0 +1,113 @@
+---
+title: A short title that describes your work
+subtitle: 
+author:  Your Name
+affiliation: CSIRO Business Unit # Or group/team
+photo: resources/img/photo.jpeg
+
+short_title: Optional short title
+
+output: DSreport::project_summary
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  results = 'asis',
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  fig.align = 'center'
+)
+
+#Load libraries
+library(tidyverse)
+library(gapminder)
+library(kableExtra)
+```
+
+
+# Introduction
+Introduce *yourself*. What's your background? Could you code before Data School? What did your 
+daily work pattern look like before Data School? Etc. This section will be placed in 
+an introductory block at the top of the page separate from the rest of the content. Don't change the section title from "Introduction" otherwise this process won't work correctly.
+
+# My Project
+Rather than yourself, this is the space to introduce your **project**. What are 
+your goals, what was your data, how do you plan to work with it? Perhaps show some example data if 
+it would help.
+
+In order to build this demo poster correctly, you will also need to have installed the `tidyverse`, 
+`gapminder`, and `kableExtra` packages.
+
+## Preliminary results
+
+This section will demonstrate the different visuals you might want use to show off your 
+project. Don't feel the need to go overboard, this is supposed to give a taste of the work you are
+doing rather than being a publication ready document.
+
+To get tables formatting correctly, use `knitr::kable` to convert the table to html format. If
+you also want to have alternate row highlighting, pass the result to `kable_styling('striped')` 
+from the `kableExtra` package.
+
+**Tables**
+```{r mytable, out.width='100%', echo = T}
+knitr::kable(head(gapminder, n = 5), format = "html", caption = "A table of data") %>% 
+  kable_styling("striped")
+```
+
+**Images from a file**
+
+![](resources/img/tidyverse.png){width=100px}
+
+**Plots from R**
+```{r standard-plot, out.width='60%', fig.align='center', fig.height= 4, fig.width=6, fig.cap="Yet another gapminder plot"}
+gapminder %>% 
+  filter(year == 1987) %>% 
+  ggplot(aes(x = gdpPercap, y = lifeExp, colour = continent, size = pop)) +
+  geom_point() +
+  scale_x_log10(labels = function(b) format(b, scientific = F)) +
+  scale_size(trans = "sqrt", guide = "none") +
+  scale_color_brewer(palette = "Set1") +
+  theme_linedraw() +
+  theme(legend.position = "bottom")
+```
+
+Your figure and table captions are automatically numbered and can be referenced in the text
+if needed: see eg. Table \@ref(tab:mytable) and Figure \@ref(fig:standard-plot)
+
+# My Digital Toolbox
+
+What digital tools have you been using in your project? Which ones have you learned since starting 
+Data School?
+
+You can use all the usual R markdown features in writing a project summary, including lists:
+
+* R - dplyr, ggplot, ...
+* Python
+* SQL
+
+## Favourite tool (optional)
+
+Is there a tool/package/function in particular that you've enjoyed using? Give it a special shout out here.
+
+![](https://raw.githubusercontent.com/tidyverse/ggplot2/master/man/figures/logo.png){.pull-right width=100px}
+
+No prizes for guessing mine:
+
+# My time went ...
+
+What parts of the project took the most time and effort? Were there any surprising challenges you
+encountered, and how did you solve them?
+
+# Next steps
+
+What further steps do you wish your project could take? Or are there any new digital skills that you
+are keen to develop as a result of your involvement in the Data School?
+
+# My Data School Experience
+
+This poster is mostly about your synthesis project. However we would also like to hear about other
+parts of your Data School experience. What aspects of the program did you really enjoy? How have you
+been applying the skills you have learned in your daily work? Have you been able to transfer this 
+knowledge to your team members? Concrete examples demonstrating this would be useful here
+(meetings/talks/collaborations/new roles). Any descriptions of the personal impact the program has 
+had are welcome here as well!
