@@ -2,12 +2,14 @@
 title: "Stills Annotations - Data summaries and exploration"
 author: "Franziska Althaus"
 date: "01/11/2019"
-output: 
+output:
+  word_document:
+    toc: yes
   html_document:
-      toc: TRUE
-      toc_float: TRUE
-      code_folding: hide
-      theme: "journal"
+    code_folding: hide
+    theme: journal
+    toc: yes
+    toc_float: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -320,7 +322,7 @@ CoralPC %>%
 
 Just concentrating on the Coral rubble, why is there a high proportion of rubble in shallow sites
 
-```{r rubble checks}
+```{r rubble checks, fig.cap="**Figure 5** distribution of coral rubble by seamount location"}
 PC_cover %>% 
   filter(L2_Code == "SU-BCOR") %>% 
   ggplot(aes(x = depth,
