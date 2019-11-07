@@ -393,7 +393,7 @@ VMEonly_TotDens %>%
 
 ## Combined substrate and VME taxa data
 
-Combining the totals of the VME taxa annotations with the percent cover annotations allows us to examine correlations between Total VME fauna density and substrate types
+Combining the totals of the VME taxa annotations with the percent cover annotations allows us to examine correlations between Total VME fauna density and substrate types. 
 
 ```{r Combine_Anno}
 
@@ -450,7 +450,8 @@ VME_AnnoAll <- PCcoverbyImage %>%
          'NS') %>% 
   left_join(TVME, by=c("image_key"="image_key"))
 
-kable(VME_AnnoAll [1:42], caption="**Table 3** Combined data matrix (by image) of percent substrate types and VME taxon densities, including the summaries of densities")
+#Reading out the data table is commented out
+#kable(VME_AnnoAll [1:42], caption="**Table 3** Combined data matrix (by image) of percent substrate types and VME taxon densities, including the summaries of densities")
 
 
 ```
