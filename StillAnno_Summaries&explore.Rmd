@@ -456,4 +456,13 @@ VME_AnnoAll <- PCcoverbyImage %>%
 
 ```
 
+Checking how well the estimated percent cover of coral matrix matches with  measured percent cover of coral matrix (dead & alive) 
 
+```{r PCcoverComparison}
+
+VME_AnnoAll %>% 
+  ggplot(mapping = aes(x= (`SC-SOL`+`SU-SOL`), 
+                     y= PC_SolMatrix))+
+   geom_point()
+
+```
