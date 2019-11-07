@@ -138,6 +138,22 @@ PC_cover <- PC_cover %>%
 PCcoverbyImage <- PC_cover %>% 
   select(image_key, L2_Code,PC_cover) %>% 
   spread(L2_Code, PC_cover) %>% 
+  replace_na(list('SC-ENLP'=0,
+                  'SU-ENLP'=0,
+                  'SC-SOL'=0,
+                  'SU-SOL'=0,
+                  'SC-MAD'=0,
+                  'SU-MAD'=0,
+                  'SU-BCOR'=0,
+                  'SU-BBAR'=0,
+                  'SU-BOTH'=0,
+                  'SU-ROK'=0,
+                  'SU-BOL'=0,
+                  'SU-COB'=0,
+                  'SU-CONBIO',
+                  'SU-PEBGRAV'=0,
+                  'SU-SAMU'=0,
+                  'NS' = 0)) %>% 
   left_join(AllSTills, by=c("image_key"="KEY"))
 write_csv(PCcoverbyImage, "Results/PCcoverbyImage.csv")
 

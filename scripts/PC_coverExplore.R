@@ -216,3 +216,72 @@ VME_TotDens %>%
 VME_TotDens %>% 
   ggplot(aes(x=noTaxa))+
   geom_histogram()  
+
+# looking at some summary stats
+VMEandSubst <- VMEannoMatrix %>% 
+  select(image_key,
+         `Black & Octocorals`,
+         `Brisingid`,
+         `D.horridus`,
+         `Enallopsammia`,
+         `Hydrocorals`,
+         `Hydrocorals: Branching`,
+         `Irregular urchins`,
+         `Madrepora`,
+         `No-VMEfauna`,
+         `Regular urchins`,
+         `S.variabilis`,
+         `Sponges`,
+         `Stalked crinoids`,
+         `Stony corals`,
+         `True anemones: Fourlobed`,
+         `Unstalked crinoids`,
+         PC_Sub_CoralReef,
+         PC_EnallopMatrix,
+         PC_SolMatrix) %>% 
+  left_join(PCcoverbyImage, by=c("image_key"="image_key"))
+
+Txx <- VMEannoMatrix %>% 
+  select(image_key,
+         `Black & Octocorals`,
+         `Brisingid`,
+         `D.horridus`,
+         `Enallopsammia`,
+         `Hydrocorals`,
+         `Hydrocorals: Branching`,
+         `Irregular urchins`,
+         `Madrepora`,
+         `No-VMEfauna`,
+         `Regular urchins`,
+         `S.variabilis`,
+         `Sponges`,
+         `Stalked crinoids`,
+         `Stony corals`,
+         `True anemones: Fourlobed`,
+         `Unstalked crinoids`,
+         PC_Sub_CoralReef,
+         PC_EnallopMatrix,
+         PC_SolMatrix) %>% 
+  left_join(VMEonly_TotDens, by=c("image_key"="image_key")) %>% 
+  left_join(VME_TotDens, by=c("image_key"="image_key")) %>% 
+  select(-MapLoc.y, -depth.y, -SVY_OPS.y)
+  
+PCcoverbyImage %>% 
+  select(image_key,
+         'SC-ENLP',
+         'SU-ENLP',
+         'SC-SOL',
+         'SU-SOL',
+         'SC-MAD',
+         'SU-MAD',
+         'SU-BCOR',
+         'SU-BBAR',
+         'SU-BOTH',
+         'SU-ROK',
+         'SU-BOL',
+         'SU-COB',
+         'SU-CONBIO',
+         'SU-PEBGRAV',
+         'SU-SAMU',
+         'NS') %>% 
+  left_join(TVME, by=c("image_key"="image_key"))
