@@ -1,9 +1,9 @@
 ---
-title: A short title that describes your work
-subtitle: 
-author:  Your Name
-affiliation: CSIRO Business Unit # Or group/team
-photo: resources/img/photo.jpeg
+title: Benthic habitats and VME fauna on the Tasmanian Seamounts
+subtitle: Report of Data School FOCUS learnings
+author:  Franziska Althaus
+affiliation: CSIRO Oceans & Atmosphere # Or group/team
+photo: resources/img/FA.jpeg
 
 short_title: Optional short title
 
@@ -26,9 +26,7 @@ library(kableExtra)
 
 
 # Introduction
-Introduce *yourself*. What's your background? Could you code before Data School? What did your 
-daily work pattern look like before Data School? Etc. This section will be placed in 
-an introductory block at the top of the page separate from the rest of the content. Don't change the section title from "Introduction" otherwise this process won't work correctly.
+I work in CSIRO Oceans and Atmosphere on deep-sea observational data from the outer continental shelf and the continental slope. 
 
 # My Project
 Rather than yourself, this is the space to introduce your **project**. What are 
