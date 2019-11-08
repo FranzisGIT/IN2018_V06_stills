@@ -137,7 +137,8 @@ PC_cover <- PC_cover %>%
 # check out overview scores and get them ready to re-attach to the 'by image data'
 glimpse(OverviewScores)
 OV1 <- OverviewScores %>% 
-  select(image_key, L1_CAT, L2_CAT) 
+  select(image_key, L1_CAT, L2_CAT) %>% 
+  rename(OV_group=L1_CAT, OV_CAT=L2_CAT)
 
 # check it only removes 3 records then re-run spread but other way round...; 
 #join location info to the by image matrix and export for QGIS mapping\
