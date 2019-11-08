@@ -86,6 +86,7 @@ check1 <- PC_cover %>%
 check2 <- PC_cover %>% 
   filter(is.na(`SelNo-NS replaced`))
 
+
 # CHECK: look at the check1 & check2 file and make sure these are not part of the selection
 # if sure, remove the data entries where `Selection round (1 orig sel, 2 replacement)` or `SelNo-NS eplaced` is NA  
 PC_cover <-  PC_cover %>% 
@@ -133,8 +134,14 @@ PC_cover %>%
 PC_cover <- PC_cover %>% 
   filter(!(image_key=="118_0138" & OpCode=="IN2018_V06_118"))   # this seems to exclude all of each element ...
 
+# check out overview scores and get them ready to re-attach to the 'by image data'
+glimpse(OverviewScores)
+OV1 <- OverviewScores %>% 
+  select(image_key, L1_CAT, L2_CAT) 
+
 # check it only removes 3 records then re-run spread but other way round...; 
-#join location info to the by image matrix and export for QGIS mapping
+#join location info to the by image matrix and export for QGIS mapping\
+# join overview score to the data matrix
 PCcoverbyImage <- PC_cover %>% 
   select(image_key, L2_Code,PC_cover) %>% 
   spread(L2_Code, PC_cover) %>% 
@@ -154,7 +161,9 @@ PCcoverbyImage <- PC_cover %>%
                   'SU-PEBGRAV'=0,
                   'SU-SAMU'=0,
                   'NS' = 0)) %>% 
-  left_join(AllSTills, by=c("image_key"="KEY"))
+  left_join(AllSTills, by=c("image_key"="KEY")) %>% 
+  left_join(OV1, by=c("image_key"="image_key"))
+
 write_csv(PCcoverbyImage, "Results/PCcoverbyImage.csv")
 
 write_csv(PC_cover, "Results/PCcover.csv")
