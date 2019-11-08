@@ -285,3 +285,46 @@ PCcoverbyImage %>%
          'SU-SAMU',
          'NS') %>% 
   left_join(TVME, by=c("image_key"="image_key"))
+
+
+# data exploration for overview scoring
+
+PCcoverbyImage %>% 
+  ggplot(aes(x = depth,
+             y = `SU-BCOR`,
+             colour = OV_CAT))+
+  geom_point(alpha=0.2)+
+  facet_wrap(~MapLoc)
+
+PCcoverbyImage %>% 
+  ggplot(aes(x = depth,
+             y = (`SU-SOL`+ `SC-SOL`),
+             colour = OV_CAT))+
+  geom_point(alpha=0.2)+
+  facet_wrap(~MapLoc)
+
+temp1 <- PC_cover %>% 
+  left_join(OV1, by=c("image_key"="image_key"))
+ temp1
+
+ PC_cover %>% 
+   group_by(L2_Code) %>% 
+   ggplot(aes(x = `OV_CAT`,
+              y = mean(PC_cover),
+              colour = L2_Code)) +
+     geom_col() +
+   theme(axis.text.x.bottom = element_text(angle = 90))
+ 
+ PCcoverbyImage %>%
+   filter(MapLoc=="z16") %>% 
+   ggplot(aes(x = depth,
+              y = (`SU-SOL`+ `SC-SOL`),
+              colour = OV_CAT))+
+   geom_point()+
+   facet_wrap(~MapLoc)
+ 
+ PC_cover %>% 
+   ggplot(aes(x = `OV_CAT`
+             )) +
+   geom_bar() +
+   theme(axis.text.x.bottom = element_text(angle = 90))

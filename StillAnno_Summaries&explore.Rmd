@@ -395,7 +395,7 @@ VMEonly_TotDens %>%
 
 Combining the totals of the VME taxa annotations with the percent cover annotations allows us to examine correlations between Total VME fauna density and substrate types. 
 
-```{r Combine_Anno}
+```{r Combine_Anno, echo=FALSE}
 
 # excluded for now 
 # looking at some summary stats
@@ -458,11 +458,41 @@ VME_AnnoAll <- PCcoverbyImage %>%
 
 Checking how well the estimated percent cover of coral matrix matches with  measured percent cover of coral matrix (dead & alive) 
 
-```{r PCcoverComparison}
+```{r PCcoverComparison, fig.cap="**Figure 8** comparison of estimated and measured percent cover of matrix"}
 
 VME_AnnoAll %>% 
   ggplot(mapping = aes(x= (`SC-SOL`+`SU-SOL`), 
                      y= PC_SolMatrix))+
    geom_point()
 
+```
+
+Looking into the overview scores of potential gear impacts for still images 
+
+```{r impact, fig.cap="**Figure 9** impact overview evaluation"}
+
+# data exploration for overview scoring
+
+PCcoverbyImage %>% 
+  ggplot(aes(x = depth,
+             y = `SU-BCOR`,
+             colour = OV_CAT))+
+  geom_point(alpha=0.2)+
+  facet_wrap(~MapLoc)
+
+PCcoverbyImage %>% 
+  ggplot(aes(x = depth,
+             y = (`SU-SOL`+ `SC-SOL`),
+             colour = OV_CAT))+
+  geom_point(alpha=0.2)+
+  facet_wrap(~MapLoc)
+
+
+ PC_cover %>% 
+   group_by(L2_Code) %>% 
+   ggplot(aes(x = `OV_CAT`,
+              y = mean(PC_cover),
+              colour = L2_Code)) +
+     geom_col() +
+   theme(axis.text.x.bottom = element_text(angle = 90))
 ```
