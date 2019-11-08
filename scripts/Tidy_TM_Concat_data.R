@@ -167,6 +167,9 @@ PCcoverbyImage <- PC_cover %>%
 
 write_csv(PCcoverbyImage, "Results/PCcoverbyImage.csv")
 
+# add the overview score to the column data and write it out
+PC_cover <- PC_cover %>% 
+  left_join(OV1, by=c("image_key"="image_key"))
 write_csv(PC_cover, "Results/PCcover.csv")
 
 
