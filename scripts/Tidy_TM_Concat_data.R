@@ -6,7 +6,7 @@
 #\fstas1-hba.nexus.csiro.au\CMAR-SHARE\Public\AlthausF\FA_DataSchool_FOCUS-Rawdata" 
 
 library(tidyverse)
-TM_RAWconcat <- read_tsv("data/Concat_20191011.TXT", skip = 4)  # fist 4 rows are not needed
+TM_RAWconcat <- read_tsv("data/Concat_20191111.TXT", skip = 4)  # fist 4 rows are not needed
 
 # select the columns that have recorded data from the file
 TM_data1 <-TM_RAWconcat %>% 
@@ -114,7 +114,7 @@ ggsave("figures/randSelPoints_byOps.jpg",
        units= "cm",
        dpi=600)
 
-
+randSelPoints_byOps
 
 # spread the data into a by image matrix formatand adding the 'overview' annotation then export to .csv for taking into QGIS maps
 glimpse(PC_cover)
