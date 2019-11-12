@@ -465,6 +465,9 @@ VME_AnnoAll %>%
                      y= PC_SolMatrix))+
    geom_point()
 
+estVmeas_lm <- lm(PC_SolMatrix ~ (`SC-SOL`+`SU-SOL`), data = VME_AnnoAll)
+
+estVmeas_lm
 ```
 
 Looking into the overview scores of potential gear impacts for still images 
