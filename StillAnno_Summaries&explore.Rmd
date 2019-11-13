@@ -3,7 +3,7 @@ title: "Stills Annotations - Data summaries and exploration"
 author: "Franziska Althaus"
 date: "01/11/2019"
 output:
-  html_document:
+  bookdown::html_document2:
     code_folding: hide
     theme: journal
     toc: yes
