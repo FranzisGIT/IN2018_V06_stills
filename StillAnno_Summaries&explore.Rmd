@@ -120,7 +120,7 @@ nTarget <- summarise(AllSTills, sum(`Target RANSMPL (1/10)`))
 
 In total `r view(nTarget)` images were targeted for annotation, of these `r nrow(PCcoverbyImage)` have been annotated for percent cover of substrate types, `r nrow(VMEannoMatrix)` have been annotated for VME taxa and zzz were identified as unsuitable for annotation and could not be replaced. Summary of the number of images targeted for stills analyses and the number of images annotated for percent cover and for VME taxa. (NOTE need to exclude operations that were not targeted from this summary)
 
-```{r Ops summaries}
+```{r TbTRansects, tab.cap ="Overviw of tansects with annotations"}
 PC_done <- PCcoverbyImage %>% 
   group_by(SVY_OPS) %>% 
   summarise(PCdone=n())
@@ -136,12 +136,12 @@ Target <- AllSTills %>%
   left_join(PC_done, by=c("SVY_OPS"="SVY_OPS")) %>% 
   left_join(VME_done, by=c("SVY_OPS"="SVY_OPS"))
 
-kable(Target[1:6], caption="**Table 1** By operation processing summary")
+kable(Target[1:6], caption="By operation processing summary")
 
 ```
 The depth distribution of the data set 
 
-```{r DataDepth, fig.cap = "depth distribution of the annotated imagery"}
+```{r FigDAtadpth, fig.cap = "depth distribution of the annotated imagery"}
 
 PCcoverbyImage %>% 
   ggplot(aes(x = depth)) +
@@ -157,7 +157,7 @@ In total there are `r nrow(PCcoverbyImage)` randomly selected images have been a
 
 Below is a summary of the data distribution across the targeted substrate types
 
-```{r PCcoverSum }
+```{r TbPCcoversummary }
 
 # check out the substrate codes that were annotated
 
@@ -165,13 +165,13 @@ PCsum <- PC_cover %>%
   group_by(L2_Code) %>% 
   summarise(meanPCcover= mean(PC_cover), PresNo_Images = n())
 
-kable(PCsum [1:3], caption="**Table 2** Summary of the data distribution across the targeted substrate types")
+kable(PCsum [1:3], caption="Summary of the data distribution across the targeted substrate types")
 
 ```
 
 The depth distribution of the live and dead coral matrix are of particular interest in looking at the depth distribution of the substrate types. 
 
-```{r PC_DepthDist, fig.cap="**Figure 1** depth distribution of substrate types summary graph"}
+```{r FigSubstDpth, fig.cap="Depth distribution of substrate types summary graph"}
 #distribution of the substrate types
 # create a vector with the sequence of the substrate types for ordering them in a meaningful way
 SubstSeq <- c('SC-ENLP',
@@ -204,7 +204,7 @@ ggplot(PC_cover,
 
 Coral rubble appears to have quite a high concentratio in the shallowest depths, scattering the raw data may make this easier to see:
 
-```{r PC_DpthDist2, fig.cap="**Figure 2** depth distribution of substrate types"}
+```{r FigPC_DpthDist2, fig.cap="Depth distribution of substrate types"}
 PC_cover %>% 
   ggplot(aes(x = depth,
              y = PC_cover))+
@@ -216,7 +216,7 @@ PC_cover %>%
 
 Distribution of the substrate types by selected locations - here the seamounts from the recovery time series are selected. 
 
-```{r PC_pies, eval=FALSE, fig.cap="**Figure 3** pie charts of substrate distribution at selected locations"}
+```{r FigPC_pies, eval=FALSE, fig.cap="**Pie charts of substrate distribution at selected locations"}
 # currentl the pie graphs are not run for the knittin...
 Fang <- PC_cover %>% 
   filter(MapLoc=="Fang") %>% 
@@ -306,7 +306,7 @@ Hill_K1
 
 Figure 2 above shows a relatively narrow depth band where _Solenosmilia_ (particulaly live coral) is observed, and a surprisingly high contribution of coral rubble in the shallowest images. Looking at the distribution of coral matrix formed by _Solenosmilia_ (SC_SOL and SU_SOL) and coral rubble (SU_BCOR) in more detail, particularly by depth and location. 
 
-```{r SV_histogram, fig.cap="**Figure 4** Frequency distrbution histograms of % cover recorded for coral matrix and rubble"}
+```{r FigSV_histogram, fig.cap="Frequency distrbution histograms of % cover recorded for coral matrix and rubble"}
 CoralPC <- PC_cover %>% 
   filter(L2_Code == "SC-SOL" |
          L2_Code == "SU-SOL" |
@@ -321,7 +321,7 @@ CoralPC %>%
 
 Just concentrating on the Coral rubble, why is there a high proportion of rubble in shallow sites
 
-```{r rubble_checks, fig.cap="**Figure 5** distribution of coral rubble by seamount location"}
+```{r FigRubble_checks, fig.cap="Distribution of coral rubble by seamount location"}
 PC_cover %>% 
   filter(L2_Code == "SU-BCOR") %>% 
   ggplot(aes(x = depth,
@@ -336,7 +336,7 @@ PC_cover %>%
 
 In total there are `r nrow(VMEannoMatrix)` randomly selected images have been annotated for the density of VME taxa to date. In total `r nrow(VME_done)` operations have been (at least partially) annotated. 
 
-```{r, PCcover_explore,  fig.cap="**Figure 6** Frequency distribution of a) total density of VME data and b) total number of taxa "}
+```{r, FigPCcover_explore,  fig.cap="*Frequency distribution of a) total density of VME data and b) total number of taxa "}
 # looking at the distribution of density and number of taxa over the whole data set
 VME_TotDens <- VMEanno_DensQ %>% 
   filter(CONCEPT != "No-VMEfauna") %>% 
@@ -359,9 +359,9 @@ plot_grid(TotVMEtax, TotVME_dens)
 
 ```
 
-Instead of total density only use the totals for actial VME taxa (excluding urchins,)
+Instead of total density only use the totals for actual VME taxa (excluding urchins,)
 
-```{r, Density_explore,  fig.cap="**Figure 6** Frequency distribution of total density of VME taxa only "}
+```{r, FigDensity_explore,  fig.cap="**Frequency distribution of total density of VME taxa only "}
 # looking at the distribution of density and number of taxa over the whole data set
 VMEonly_TotDens <- VMEanno_DensQ %>% 
   filter( CONCEPT == "Black & Octocorals" |
@@ -458,7 +458,7 @@ VME_AnnoAll <- PCcoverbyImage %>%
 
 Checking how well the estimated percent cover of coral matrix matches with  measured percent cover of coral matrix (dead & alive) 
 
-```{r PCcoverComparison, fig.cap="**Figure 8** comparison of estimated and measured percent cover of matrix"}
+```{r FigPCcoverComparison, fig.cap="Comparison of estimated and measured percent cover of matrix"}
 
 VME_AnnoAll %>% 
   ggplot(mapping = aes(x= (`SC-SOL`+`SU-SOL`), 
@@ -472,7 +472,7 @@ estVmeas_lm
 
 Looking into the overview scores of potential gear impacts for still images 
 
-```{r impact, fig.cap="**Figure 9** impact overview evaluation"}
+```{r FigImpactdata, fig.cap="Impact overview evaluation"}
 
 # data exploration for overview scoring
 
