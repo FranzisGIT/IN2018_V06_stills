@@ -310,7 +310,7 @@ Figure 2 above shows a relatively narrow depth band where _Solenosmilia_ (partic
 CoralPC <- PC_cover %>% 
   filter(L2_Code == "SC-SOL" |
          L2_Code == "SU-SOL" |
-         L2_Code == "SU-BCOR")
+        L2_Code == "SU-BCOR"  )
 
 CoralPC %>% 
   ggplot(aes(x = PC_cover)) +
