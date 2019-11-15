@@ -1,7 +1,7 @@
 # tidying up VME fauna anotations extract from ORACLE BHIMAGE -- extract created using VARS_2018-StillsAnnoExtracts.sql
 # 
 library(tidyverse)
-VMEanno_raw <- read_csv("data/IN2018_V06_STILLS_VME_20191028.csv", na = c("(null)", "NA"))
+VMEanno_raw <- read_csv("data/IN2018_V06_STILLS_VME_20191115.csv", na = c("(null)", "NA"))
 
 # tidy up the CNT column first make No VME fauna a zero and Hydrocorals 1 (presence) then
 # convert numeric values to numbers in new variable so only the counts are stored  
@@ -63,17 +63,16 @@ VMEanno_data <- VMEanno_IDs %>%
 # for data school the data is located on CSIRO network at: 
 #\fstas1-hba.nexus.csiro.au\CMAR-SHARE\Public\AlthausF\FA_DataSchool_FOCUS-Rawdata" 
 
-AllSTills <- read_csv("data/IN2018_V06_AllStills.csv")
+AllSTills <- read_csv("data/IN2018_V06_AllStills.csv", col_types = "ccccccdddccdddcdd")
 
 #check number of rows in percent cover data - ensure number rows stays the same with join below
-nrow(VMEanno_data)
+nrow(PC_cover_Anno)
 
 # make depth numeric
 
 AllSTills <- AllSTills %>% 
   mutate(depth=as.numeric(Z)) %>% 
   select(-c(Z))
-
 
 
 # BITS THAT MIGHT BE USEFUL...
