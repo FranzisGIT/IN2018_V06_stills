@@ -6,7 +6,7 @@
 #\fstas1-hba.nexus.csiro.au\CMAR-SHARE\Public\AlthausF\FA_DataSchool_FOCUS-Rawdata" 
 
 library(tidyverse)
-TM_RAWconcat <- read_tsv("data/Concat_20191111.TXT", skip = 4)  # fist 4 rows are not needed
+TM_RAWconcat <- read_tsv("data/Concat_20191115.TXT", skip = 4)  # fist 4 rows are not needed
 
 # select the columns that have recorded data from the file
 TM_data1 <-TM_RAWconcat %>% 
@@ -61,7 +61,7 @@ PC_cover_Anno <- right_join(PC_cover_Anno1,PtsPerImage, by=c("image_key"="image_
 # for data school the data is located on CSIRO network at: 
 #\fstas1-hba.nexus.csiro.au\CMAR-SHARE\Public\AlthausF\FA_DataSchool_FOCUS-Rawdata" 
 
-AllSTills <- read_csv("data/IN2018_V06_AllStills.csv")
+AllSTills <- read_csv("data/IN2018_V06_AllStills.csv", col_types = "ccccccdddccdddcdd")
 
 #check number of rows in percent cover data - ensure number rows stays the same with join below
 nrow(PC_cover_Anno)
