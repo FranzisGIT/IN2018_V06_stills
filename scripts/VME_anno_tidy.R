@@ -66,7 +66,7 @@ VMEanno_data <- VMEanno_IDs %>%
 AllSTills <- read_csv("data/IN2018_V06_AllStills.csv", col_types = "ccccccdddccdddcdd")
 
 #check number of rows in percent cover data - ensure number rows stays the same with join below
-nrow(PC_cover_Anno)
+nrow(VMEanno_data)
 
 # make depth numeric
 
@@ -83,11 +83,11 @@ VMEanno_data1 <- left_join(VMEanno_data, AllSTills, by=c("image_key"="KEY"))
 # check the data for annotations that are not part of the data annotation plan (there is a number entry in Selection round and SelNo - NS replaced)
 glimpse(VMEanno_data1)
 
-check1 <- VMEanno_data1 %>% 
+check1 <- VMEanno_data2 %>% 
   group_by(`Selection round (1 orig sel, 2 replacement)`) %>% 
   summarise(n())
 
-check2 <- VMEanno_data1 %>% 
+check2 <- VMEanno_data2 %>% 
   filter(is.na(`SelNo-NS replaced`))
 
 #CHECK: look at the check1 & check2 file and make sure these are not part of the selection
@@ -98,6 +98,7 @@ VMEanno_data2 <-  VMEanno_data1 %>%
          !is.na(`SelNo-NS replaced`),
          `Selection round (1 orig sel, 2 replacement)`<100)
 
+glimpse(VMEanno_data2)
 #filter out substrate categories where % cover was estimated instead of a count
 
 VMEanno_PCcoral <- VMEanno_data2 %>% 
@@ -158,7 +159,7 @@ t2 <- VMEanno_PCcoral %>%
 
 # create data matrix of densities and percnt cover per image and replacng NA's with 0 for the measurements, export data as csv for input into QGIS
 
-VMEannoMatrix <- left_join(t2, t1, by=c("image_key"="image_key")) %>% 
+VMEannoMatrix <- full_join(t1, t2, by=c("image_key"="image_key")) %>% 
   replace_na(list(`Black & Octocorals` = 0,
                   `Brisingid` = 0,
                   `D.horridus` = 0,
