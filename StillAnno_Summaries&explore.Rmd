@@ -114,11 +114,19 @@ VMEanno_DensQ <- read_csv("Results/VMEanno_DensQ.csv")
 VMEanno_PCcoral <- read_csv("Results/VMEanno_PCcoral.csv")
 VMEannoMatrix <- read_csv("Results/VMEannoMatrix.csv")
 
-nTarget <- summarise(AllSTills, sum(`Target RANSMPL (1/10)`))
-#tried to call this in text xxx with `r view(nTarget)` but doesn't work
+
+
+SelectedStlls <- AllSTills %>% 
+  filter(`Selection round (1 orig sel, 2 replacement)` == 1 |
+           `Selection round (1 orig sel, 2 replacement)` == 2 |
+           `Selection round (1 orig sel, 2 replacement)` == 3) 
+
+NSNR <-  SelectedStlls %>% 
+  filter(RAN_SEL_STAT == "NS-NR") 
+
 ```
 
-In total `r view(nTarget)` images were targeted for annotation, of these `r nrow(PCcoverbyImage)` have been annotated for percent cover of substrate types, `r nrow(VMEannoMatrix)` have been annotated for VME taxa and zzz were identified as unsuitable for annotation and could not be replaced. Summary of the number of images targeted for stills analyses and the number of images annotated for percent cover and for VME taxa. (NOTE need to exclude operations that were not targeted from this summary)
+In total 5985 images were potentially targeted for annotation, of these `r nrow(PCcoverbyImage)` have been annotated for percent cover of substrate types, `r nrow(VMEannoMatrix)` have been annotated for VME taxa and `r nrow(NSNR)` were identified as unsuitable for annotation and could not be replaced. Summary of the number of images targeted for stills analyses and the number of images annotated for percent cover and for VME taxa. (NOTE need to exclude operations that were not targeted from this summary)
 
 ```{r TbTRansects, tab.cap ="Overviw of tansects with annotations"}
 PC_done <- PCcoverbyImage %>% 
@@ -132,9 +140,16 @@ VME_done <- VMEannoMatrix %>%
 ## NOTE will need to limit the data here to target ops only
 Target <- AllSTills %>% 
   group_by(SVY_OPS, MapLoc, `Target RANSMPL (1/10)`) %>% 
-  summarise(RandSelection=n()) %>% 
+  filter(`Selection round (1 orig sel, 2 replacement)` == 1 |
+           `Selection round (1 orig sel, 2 replacement)` == 2 |
+           `Selection round (1 orig sel, 2 replacement)` == 3) %>%
+  filter(RAN_SEL_STAT != "R") %>% 
+  summarise(Selected = n()) %>% 
   left_join(PC_done, by=c("SVY_OPS"="SVY_OPS")) %>% 
   left_join(VME_done, by=c("SVY_OPS"="SVY_OPS"))
+
+
+#tried to call this in text xxx with `r view(nTarget)` but doesn't work
 
 kable(Target[1:6], caption="By operation processing summary")
 
