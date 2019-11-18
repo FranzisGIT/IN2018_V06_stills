@@ -328,3 +328,10 @@ temp1 <- PC_cover %>%
              )) +
    geom_bar() +
    theme(axis.text.x.bottom = element_text(angle = 90))
+ 
+AllSTills %>% 
+  filter(`Selection round (1 orig sel, 2 replacement)` == 1 |
+           `Selection round (1 orig sel, 2 replacement)` == 2 |
+           `Selection round (1 orig sel, 2 replacement)` == 3) %>% 
+  group_by(RAN_SEL_STAT) %>% 
+  summarise(cntImages=n())
