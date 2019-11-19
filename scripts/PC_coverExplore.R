@@ -335,3 +335,23 @@ AllSTills %>%
            `Selection round (1 orig sel, 2 replacement)` == 3) %>% 
   group_by(RAN_SEL_STAT) %>% 
   summarise(cntImages=n())
+
+
+nTarget <- Target %>% 
+  ungroup %>% 
+  summarise(sum(`Target RANSMPL (1/10)`))
+nTarget
+
+
+VMEanno_data %>% 
+  group_by(image_key) %>% 
+  summarise(no_anno=n()) %>% 
+  ungroup() %>% 
+  summarize(noIm=n())
+
+
+VME_AnnoAll %>% 
+  ggplot(mapping = aes(x= (`SC-SOL`+`SU-SOL`), 
+                       y= PC_SolMatrix,
+                    ))+
+  geom_point()  
