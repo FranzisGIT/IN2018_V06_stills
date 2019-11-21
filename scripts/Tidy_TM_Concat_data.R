@@ -6,7 +6,7 @@
 #\fstas1-hba.nexus.csiro.au\CMAR-SHARE\Public\AlthausF\FA_DataSchool_FOCUS-Rawdata" 
 
 library(tidyverse)
-TM_RAWconcat <- read_tsv("data/Concat_20191115.TXT", skip = 4)  # fist 4 rows are not needed
+TM_RAWconcat <- read_tsv("data/Concat_20191121.TXT", skip = 4)  # fist 4 rows are not needed
 
 # select the columns that have recorded data from the file
 TM_data1 <-TM_RAWconcat %>% 
