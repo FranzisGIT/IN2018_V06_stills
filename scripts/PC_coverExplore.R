@@ -355,3 +355,15 @@ VME_AnnoAll %>%
                        y= PC_SolMatrix,
                     ))+
   geom_point()  
+
+
+PC_cover %>%
+  filter(`OV_CAT` != `No rubble or matrix` &
+           `OV_CAT` != `High - reef` &
+           `OV_CAT` != `Low - sediment fille`) %>% 
+  group_by(MapLoc, `OV_CAT`) %>% 
+  ggplot(aes(x = MapLoc,
+             y = mean(PC_cover),
+             colour = `OV_CAT`)) +
+  geom_col() +
+  theme(axis.text.x.bottom = element_text(angle = 90))

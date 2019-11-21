@@ -41,5 +41,5 @@ z16 <- Video1s %>%
                      colour = SUBSTRATE) )+
   geom_point()+
   scale_y_reverse()+ 
-  facet_wrap(~OPS)
+  facet_wrap(~OPS, scales = "free_x")
 z16

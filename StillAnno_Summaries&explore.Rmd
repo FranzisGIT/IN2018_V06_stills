@@ -487,10 +487,17 @@ estVmeas_lm
 
 Looking into the overview scores of potential gear impacts for still images 
 
-```{r FigImpactdata, fig.cap="Impact overview evaluation"}
+```{r Tb_overviw} 
 
 # data exploration for overview scoring
+OvCat<- PCcoverbyImage %>% 
+  group_by(OV_CAT) %>% 
+  summarise(cntRec = n())
 
+ kable(OvCat, caption="overview categories scored")
+```
+
+```{r FigImpactdata, fig.cap="Impact overview evaluation"}
 PCcoverbyImage %>% 
   ggplot(aes(x = depth,
              y = `SU-BCOR`,
@@ -505,12 +512,32 @@ PCcoverbyImage %>%
   geom_point(alpha=0.2)+
   facet_wrap(~MapLoc)
 
-
- PC_cover %>% 
+PC_cover %>% 
    group_by(L2_Code) %>% 
    ggplot(aes(x = `OV_CAT`,
               y = mean(PC_cover),
               colour = L2_Code)) +
      geom_col() +
    theme(axis.text.x.bottom = element_text(angle = 90))
+ 
+
+```
+
+Looking at the distribution of the overview categories by seamount will help to identify locations for further scrutiny:
+
+```{r impact overviw}
+
+
+## PC_cover %>%
+#  filter(
+#        OV_CAT != `High - reef` &
+#          OV_CAT != `Low - sediment filled`) %>% 
+#group_by(MapLoc, OV_CAT) %>% 
+#   ggplot(aes(x = MapLoc,
+#              y = mean(PC_cover),
+#              colour = OV_CAT)) +
+ #    geom_col() +
+#   theme(axis.text.x.bottom = element_text(angle = 90))
+
+
 ```
