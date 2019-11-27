@@ -484,7 +484,8 @@ estVmeas_lm <- lm(PC_SolMatrix ~ (`SC-SOL`+`SU-SOL`), data = VME_AnnoAll)
 
 estVmeas_lm
 ```
-```{r MyFig4, fig.align='center', fig.height= 4, fig.width=6,  fig.cap="Relationship between density of VME taxa and percent cover of matrix forming coral"}
+checking out the distribution of VME taxa over coral matrix substrates.
+```{r MyFig4, fig.align='center', fig.height= 4, fig.width=10,  fig.cap="Relationship between density of VME taxa and percent cover of matrix forming coral"}
 VMEanno_DensQ %>% 
   left_join(PCcoverbyImage, by=c("image_key"="image_key")) %>% 
   filter((`SC-SOL`+`SU-SOL`) != 0) %>% 
@@ -493,7 +494,7 @@ VMEanno_DensQ %>%
                      ))+
    geom_point()+
   labs(x="% cover coral matrix (dead and alive)", y="density of VME taxa (ind./m2)")+
-  facet_wrap(~CONCEPT, scales = "free_x")
+  facet_wrap(~CONCEPT, scales = "free_y")
 ```
 
 Looking into the overview scores of potential gear impacts for still images 
