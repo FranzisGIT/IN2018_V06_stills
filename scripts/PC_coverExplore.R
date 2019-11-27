@@ -367,3 +367,7 @@ PC_cover %>%
              colour = `OV_CAT`)) +
   geom_col() +
   theme(axis.text.x.bottom = element_text(angle = 90))
+
+OVcats <- OV1 %>% 
+  group_by(OV_group, OV_CAT) %>% 
+  summarise(cnt=n())
