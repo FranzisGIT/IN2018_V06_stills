@@ -6,7 +6,7 @@
 #\fstas1-hba.nexus.csiro.au\CMAR-SHARE\Public\AlthausF\FA_DataSchool_FOCUS-Rawdata" 
 
 library(tidyverse)
-TM_RAWconcat <- read_tsv("data/Concat_20191121.TXT", skip = 4)  # fist 4 rows are not needed
+TM_RAWconcat <- read_tsv("data/Concat_20191218.TXT", skip = 4)  # fist 4 rows are not needed
 
 # select the columns that have recorded data from the file
 TM_data1 <-TM_RAWconcat %>% 
@@ -17,28 +17,128 @@ glimpse(TM_data1)
 # create the image_key - a unique identifier for each image using the operation number (last 3 digits from OpCode (ignoring _NEW)) and image number (last 4 digits of filename excuding .JPG)
 # create RanSel_key the random selection number within a transect(deployment) using peration number (last 3 digits from OpCode) and random selection number (first 3 digits 
 # of filename, excluding the first letter
+# exclude records where no annotations were made
 
 TM_data <- TM_data1  %>% 
   mutate(RanSelNo = str_sub(Filename, start=2, end=4),
          OpsNo = str_sub(OpCode, start=12, end=14),          # this picks the operation number out ignoring tailing '_NEW'
          ImageNo = str_sub(Filename, start=48, end=51),      # separate the components out
          image_key = paste(OpsNo,"_",ImageNo, sep=""),        #create the image_key
-         ranSel_key = paste(OpsNo,"_",RanSelNo, sep=""))     #create the random selection key
+         ranSel_key = paste(OpsNo,"_",RanSelNo, sep="")) %>%   #create the random selection key
+  filter(!is.na(L1_CAT))
   
+  
+# check for duplication of images scored in original and 'NEW' TM to weed out double scoring - write out the result and get it fixrd at data entry level.
+dataTemp <- TM_data %>% 
+  group_by(OpCode, image_key) %>% 
+  summarise(count = n())
+
+duplicates <- dataTemp %>% 
+  ungroup() %>% 
+  group_by(image_key) %>% 
+  summarise(countSum = sum(count), NoOps = n()) %>% 
+  filter(NoOps!=1)
+write_csv(duplicates, "Results/duplicateScored.csv")
+
+# once the duplicate scores are weeded out (no data in above tibble) continue data cleaning
 
 # filter out the 'overall image scores that should all have a NOTE saying 'user defined' 
 # also select the entries where NOTE was omitted (forgotten), but the L2 code is of overview type
+# add impacts groupings and classes for L2_codes and replace wordy L2_code with a shorter Letter coding 
 
 OverviewScores <-  TM_data %>% 
   filter(!is.na(NOTES)|
-           (str_detect(L2_Code, "SU_*", negate = TRUE) & 
-           str_detect(L2_Code, "SC_*", negate = TRUE) & 
-           str_detect(L2_Code, "NS", negate = TRUE))  )   
-        
+           (str_detect(L2_Code, "SU-*", negate = TRUE) & 
+           str_detect(L2_Code, "SC-*", negate = TRUE) & 
+           str_detect(L2_Code, "NS", negate = TRUE))  ) %>% 
+  mutate(ImpGroup = case_when(
+      L2_Code == "N/A" ~"0",
+      L2_Code == "High - reef" ~"8",
+      L2_Code == "Low - sediment filled" ~"0",
+      L2_Code == "Isolated fragments/ clumps" ~"4",
+      L2_Code == "MedAb - with clumps - dead" ~"2",
+      L2_Code == "HighAb - with patch - live" ~"6",
+      L2_Code == "HighAb - with other" ~"3",
+      L2_Code == "Low - with patch - live" ~"7",
+      L2_Code == "HighAb - with clumps - dead" ~"2",
+      L2_Code == "High - shaved" ~"1",
+      L2_Code == "Low - with clumps - dead" ~"2",
+      L2_Code == "LowAb - with clumps" ~"2",
+      L2_Code == "Shaved" ~"1",
+      L2_Code == "MedAb" ~"8",
+      L2_Code == "LowAb - no clumps" ~"0",
+      L2_Code == "MedAb - with patch - dead" ~"6",
+      L2_Code == "Low - shaved" ~"1",
+      L2_Code == "Low - with patch - dead" ~"7",
+      L2_Code == "MedAb - with patch - live" ~"6",
+      L2_Code == "HighAb - with patch - dead" ~"5",
+      L2_Code == "MedAb - with clumps - live" ~"2",
+      L2_Code == "HighAb - no other" ~"3",
+      L2_Code == "HighAb - with clumps - live" ~"2",
+      L2_Code == "Low - with clumps - live" ~"2"   
+      )) %>% 
+  mutate(ImpGroup = as.numeric(ImpGroup)) %>% 
+  mutate(ImpClass = case_when(
+    L2_Code == "N/A" ~"0",
+    L2_Code == "High - reef" ~"8M",
+    L2_Code == "Low - sediment filled" ~"0M",
+    L2_Code == "Isolated fragments/ clumps" ~"4R",
+    L2_Code == "MedAb - with clumps - dead" ~"2R_M",
+    L2_Code == "HighAb - with patch - live" ~"6R",
+    L2_Code == "HighAb - with other" ~"3R",
+    L2_Code == "Low - with patch - live" ~"7M",
+    L2_Code == "HighAb - with clumps - dead" ~"2R_H",
+    L2_Code == "High - shaved" ~"1M",
+    L2_Code == "Low - with clumps - dead" ~"2M",
+    L2_Code == "LowAb - with clumps" ~"2R_L",
+    L2_Code == "Shaved" ~"1R",
+    L2_Code == "MedAb" ~"8R",
+    L2_Code == "LowAb - no clumps" ~"0R",
+    L2_Code == "MedAb - with patch - dead" ~"6R",
+    L2_Code == "Low - shaved" ~"1M",
+    L2_Code == "Low - with patch - dead" ~"7M",
+    L2_Code == "MedAb - with patch - live" ~"6R",
+    L2_Code == "HighAb - with patch - dead" ~"5R",
+    L2_Code == "MedAb - with clumps - live" ~"2R_M",
+    L2_Code == "HighAb - no other" ~"3R",
+    L2_Code == "HighAb - with clumps - live" ~"2R_H",
+    L2_Code == "Low - with clumps - live" ~"2M"   
+  )) %>% 
+  mutate(L2_Code = case_when(
+    L2_Code == "N/A" ~"OTHER",
+    L2_Code == "High - reef" ~"MHReef",
+    L2_Code == "Low - sediment filled" ~"MLSed",
+    L2_Code == "Isolated fragments/ clumps" ~"RIC",
+    L2_Code == "MedAb - with clumps - dead" ~"RmCD",
+    L2_Code == "HighAb - with patch - live" ~"RhPL",
+    L2_Code == "HighAb - with other" ~"RhO",
+    L2_Code == "Low - with patch - live" ~"MLPL",
+    L2_Code == "HighAb - with clumps - dead" ~"RhCD",
+    L2_Code == "High - shaved" ~"MHS",
+    L2_Code == "Low - with clumps - dead" ~"MLCD",
+    L2_Code == "LowAb - with clumps" ~"RlC",
+    L2_Code == "Shaved" ~"RS",
+    L2_Code == "MedAb" ~"Rm",
+    L2_Code == "LowAb - no clumps" ~"RlNC",
+    L2_Code == "MedAb - with patch - dead" ~"RmPD",
+    L2_Code == "Low - shaved" ~"MLS",
+    L2_Code == "Low - with patch - dead" ~"MLPD",
+    L2_Code == "MedAb - with patch - live" ~"RmPL",
+    L2_Code == "HighAb - with patch - dead" ~"RhPD",
+    L2_Code == "MedAb - with clumps - live" ~"RmCL",
+    L2_Code == "HighAb - no other" ~"RhNOth",
+    L2_Code == "HighAb - with clumps - live" ~"RhCL",
+    L2_Code == "Low - with clumps - live" ~"MLCL"
+  ))
+
+# identify overview scores used 
+OV_cat <- OverviewScores %>% 
+  distinct(L1_CAT, L2_CAT,L2_Code, ImpGroup, ImpClass)
+    
 # filter out the Percent cover point annotations including blanks
 PC_cover_Anno1 <- TM_data %>% 
-  filter(str_detect(L2_Code, "SU_*")| 
-         str_detect(L2_Code, "SC_*") | 
+  filter(str_detect(L2_Code, "SU-*")| 
+         str_detect(L2_Code, "SC-*") | 
          str_detect(L2_Code, "NS") | 
          is.na(L2_Code)
           ) %>% 
@@ -116,6 +216,7 @@ ggsave("figures/randSelPoints_byOps.jpg",
 
 randSelPoints_byOps
 
+
 # spread the data into a by image matrix formatand adding the 'overview' annotation then export to .csv for taking into QGIS maps
 glimpse(PC_cover)
 
@@ -123,24 +224,15 @@ PC_cover <- ungroup(PC_cover)   # ensuring that no groupings are left over from 
 
 
 PC_cover %>% 
-  select(image_key, L2_Code,PC_cover) %>% 
-  spread(image_key, PC_cover)
+  select(image_key, L2_Code, PC_cover) %>% 
+  spread(L2_Code, PC_cover)
 
-# error from spread code above pointed out three records that were duplicated in the annotation. The annotations from 
-# image 138 in operation 118 associated with the 'old' OpCode need to be deleted, the annotations for the same ops & 
-#image with OpCode IN2018_V06_118_NEW need to be kept
-
-
-PC_cover <- PC_cover %>% 
-  filter(!(image_key=="118_0138" & OpCode=="IN2018_V06_118"))   # this seems to exclude all of each element ...
 
 # check out overview scores and get them ready to re-attach to the 'by image data'
 glimpse(OverviewScores)
 OV1 <- OverviewScores %>% 
-  select(image_key, L1_CAT, L2_CAT) %>% 
-  rename(OV_group=L1_CAT, OV_CAT=L2_CAT) %>% 
-  mutate(OV_Imp = OV_CAT, OV_Imp2=OV_CAT) %>% 
-  replace()
+  select(image_key, L1_CAT, L2_CAT, L2_Code, ImpGroup, ImpClass) %>% 
+  rename(OV_group=L1_CAT, OV_CAT=L2_CAT, OV_CD=L2_Code) 
 
 
 # check it only removes 3 records then re-run spread but other way round...; 
