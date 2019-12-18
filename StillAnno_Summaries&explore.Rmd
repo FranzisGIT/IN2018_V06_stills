@@ -503,8 +503,9 @@ Looking into the overview scores of potential gear impacts for still images
 
 # data exploration for overview scoring
 OvCat<- PCcoverbyImage %>% 
-  group_by(OV_CAT) %>% 
-  summarise(cntRec = n())
+  group_by(OV_CAT, ImpGroup, ImpClass) %>% 
+  summarise(cntRec = n()) %>% 
+  arrange(ImpClass)
 
  kable(OvCat, caption="overview categories scored")
 ```
@@ -513,20 +514,20 @@ OvCat<- PCcoverbyImage %>%
 PCcoverbyImage %>% 
   ggplot(aes(x = depth,
              y = `SU-BCOR`,
-             colour = OV_CAT))+
+             colour = ImpClass))+
   geom_point(alpha=0.2)+
   facet_wrap(~MapLoc)
 
 PCcoverbyImage %>% 
   ggplot(aes(x = depth,
              y = (`SU-SOL`+ `SC-SOL`),
-             colour = OV_CAT))+
+             colour = ImpClass))+
   geom_point(alpha=0.2)+
   facet_wrap(~MapLoc)
 
 PC_cover %>% 
    group_by(L2_Code) %>% 
-   ggplot(aes(x = `OV_CAT`,
+   ggplot(aes(x = ImpClass,
               y = mean(PC_cover),
               colour = L2_Code)) +
      geom_col() +
