@@ -368,6 +368,7 @@ PC_cover %>%
   geom_col() +
   theme(axis.text.x.bottom = element_text(angle = 90))
 
-OVcats <- OV1 %>% 
-  group_by(OV_group, OV_CAT) %>% 
-  summarise(cnt=n())
+
+OV1 %>% 
+  left_join(AllSTills, by=c("image_key"="KEY")) %>% 
+  write_csv("Results/ImapactsTemp.csv")
