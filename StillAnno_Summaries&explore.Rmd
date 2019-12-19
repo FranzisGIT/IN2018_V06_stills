@@ -172,7 +172,7 @@ In total there are `r nrow(PCcoverbyImage)` randomly selected images have been a
 
 Below is a summary of the data distribution across the targeted substrate types
 
-```{r TbPCcoversummary }
+```{r TbPCcoversummary, tab.cap ="Overviw of substrate scores" }
 
 # check out the substrate codes that were annotated
 
@@ -219,7 +219,7 @@ ggplot(PC_cover,
 
 Coral rubble appears to have quite a high concentratio in the shallowest depths, scattering the raw data may make this easier to see:
 
-```{r FigPC_DpthDist2, fig.cap="Depth distribution of substrate types"}
+```{r FigPCSMsuDist, out.width='100%', fig.align='center', fig.cap="Depth distribution of substrate types"}
 PC_cover %>% 
   ggplot(aes(x = depth,
              y = PC_cover))+
@@ -231,7 +231,7 @@ PC_cover %>%
 
 Distribution of the substrate types by selected locations - here the seamounts from the recovery time series are selected. 
 
-```{r FigPC_pies, eval=FALSE, fig.cap="**Pie charts of substrate distribution at selected locations"}
+```{r FigPCpies, eval=FALSE, fig.cap="**Pie charts of substrate distribution at selected locations"}
 # currentl the pie graphs are not run for the knittin...
 Fang <- PC_cover %>% 
   filter(MapLoc=="Fang") %>% 
@@ -321,7 +321,7 @@ Hill_K1
 
 Figure 2 above shows a relatively narrow depth band where _Solenosmilia_ (particulaly live coral) is observed, and a surprisingly high contribution of coral rubble in the shallowest images. Looking at the distribution of coral matrix formed by _Solenosmilia_ (SC_SOL and SU_SOL) and coral rubble (SU_BCOR) in more detail, particularly by depth and location. 
 
-```{r FigSV_histogram, fig.cap="Frequency distrbution histograms of % cover recorded for coral matrix and rubble"}
+```{r FigSVhist, out.width='100%', fig.align='center', fig.cap="Frequency distrbution histograms of % cover recorded for coral matrix and rubble"}
 CoralPC <- PC_cover %>% 
   filter(L2_Code == "SC-SOL" |
          L2_Code == "SU-SOL" |
@@ -336,7 +336,7 @@ CoralPC %>%
 
 Just concentrating on the Coral rubble, why is there a high proportion of rubble in shallow sites
 
-```{r FigRubble_checks, fig.cap="Distribution of coral rubble by seamount location"}
+```{r FigRubChecks, out.width='100%', fig.align='center', fig.cap="Distribution of coral rubble by seamount location"}
 PC_cover %>% 
   filter(L2_Code == "SU-BCOR") %>% 
   ggplot(aes(x = depth,
@@ -351,7 +351,7 @@ PC_cover %>%
 
 In total there are `r nrow(VMEannoMatrix)` randomly selected images have been annotated for the density of VME taxa to date. In total `r nrow(VME_done)` operations have been (at least partially) annotated. 
 
-```{r, FigPCcover_explore,  fig.cap="*Frequency distribution of a) total density of VME data and b) total number of taxa "}
+```{r, FigPCExp,  fig.cap="*Frequency distribution of a) total density of VME data and b) total number of taxa "}
 # looking at the distribution of density and number of taxa over the whole data set
 VME_TotDens <- VMEanno_DensQ %>% 
   filter(CONCEPT != "No-VMEfauna") %>% 
@@ -376,7 +376,7 @@ plot_grid(TotVMEtax, TotVME_dens)
 
 Instead of total density only use the totals for actual VME taxa (excluding urchins,)
 
-```{r, FigDensity_explore,  fig.cap="**Frequency distribution of total density of VME taxa only "}
+```{r, FigDensEx,  fig.cap="**Frequency distribution of total density of VME taxa only "}
 # looking at the distribution of density and number of taxa over the whole data set
 VMEonly_TotDens <- VMEanno_DensQ %>% 
   filter( CONCEPT == "Black & Octocorals" |
@@ -473,7 +473,7 @@ VME_AnnoAll <- PCcoverbyImage %>%
 
 Checking how well the estimated percent cover of coral matrix matches with  measured percent cover of coral matrix (dead & alive) 
 
-```{r FigPCcoverComparison, fig.cap="Comparison of estimated and measured percent cover of matrix"}
+```{r FigPCcoverComparison, out.width='100%', fig.align='center', fig.cap="Comparison of estimated and measured percent cover of matrix"}
 
 VME_AnnoAll %>% 
   ggplot(mapping = aes(x= (`SC-SOL`+`SU-SOL`), 
@@ -499,7 +499,7 @@ VMEanno_DensQ %>%
 
 Looking into the overview scores of potential gear impacts for still images 
 
-```{r Tb_overviw} 
+```{r TbImpOv, tab.cap ="Overviw scores grouped by impact classes"} 
 
 # data exploration for overview scoring
 OvCat<- PCcoverbyImage %>% 
@@ -510,7 +510,7 @@ OvCat<- PCcoverbyImage %>%
  kable(OvCat, caption="overview categories scored")
 ```
 
-```{r FigImpactdata, fig.cap="Impact overview evaluation"}
+```{r FigImpactdata, eval = FALSE, out.width='100%', fig.align='center', fig.cap="Impact overview evaluation"}
 PCcoverbyImage %>% 
   ggplot(aes(x = depth,
              y = `SU-BCOR`,
@@ -529,28 +529,43 @@ PC_cover %>%
    group_by(L2_Code) %>% 
    ggplot(aes(x = ImpClass,
               y = mean(PC_cover),
-              colour = L2_Code)) +
+              fill = L2_Code)) +
      geom_col() +
    theme(axis.text.x.bottom = element_text(angle = 90))
- 
+
+PCcoverbyImage %>% 
+  ggplot(aes(x = depth,
+             y = (`SU-SOL`+ `SC-SOL`+`SU-BCOR`),
+             colour = ImpClass))+
+  geom_point(alpha=0.2)+
+  facet_wrap(~MapLoc) 
 
 ```
 
 Looking at the distribution of the overview categories by seamount will help to identify locations for further scrutiny:
 
-```{r impact overviw}
+```{r FigSMImpact, out.width='100%', fig.align='center', fig.cap="Overview of impact scores over depth for each seamount"}
 
-
-## PC_cover %>%
-#  filter(
-#        OV_CAT != `High - reef` &
-#          OV_CAT != `Low - sediment filled`) %>% 
-#group_by(MapLoc, OV_CAT) %>% 
-#   ggplot(aes(x = MapLoc,
-#              y = mean(PC_cover),
-#              colour = OV_CAT)) +
- #    geom_col() +
-#   theme(axis.text.x.bottom = element_text(angle = 90))
+colpal <-  c("grey",
+            "blue",
+             "cyan",
+             "purple",
+             "Orchid",
+             "green",
+             "orange",
+             "red",
+             "brown",
+             "black")
+ggplot(PC_cover,
+       mapping = aes(x=factor(ImpClass),              #call the pre existing vector
+                    y=depth,
+                    colour = factor(ImpGroup)))+
+  geom_point(alpha=0.2)+
+  scale_y_reverse() +                            # reverse y-axis because it represents ocean depth 
+  theme(axis.text.x = element_text(angle = 90))+   # rotate the label on x-axis
+  scale_color_manual(values = colpal)+
+  labs(x="Impactclass", y="depth")+
+  facet_wrap(~MapLoc)
 
 
 ```
