@@ -1,0 +1,420 @@
+---
+title: "Stills Annotations for impacts - Data summaries and exploration"
+author: "Franziska Althaus"
+date: "19/12/2019"
+output:
+  bookdown::html_document2:
+    code_folding: hide
+    theme: journal
+    toc: yes
+    toc_float: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+library(tidyverse)
+library(cowplot)
+library(knitr)
+```
+
+# Background
+
+A survey of the seamounts south of Tasmania on board of the Australian Marine National Facility Vessel Investigator imagery of the seafloor was collected on transects using a towed camera system.
+The imagery consist of Video and stereo still images. The data is structured into seamounts (Map Locations), transects (operations) and images that are geolocated in space. A selection of the stereo stills are processed to generate a quadrat of measured size overlaid on the image. The area within quadrats is annotated for (1) percent cover of substrate types with the matrix-forming coral (esp. _Solenosmilia variabilis_) being of particular interest; in addition an overview score for each image was recorded to guage potential signs of anthropogenic impacts, particularly where coral matrix or rubble was observed.
+
+# Image annotations
+
+## 1. Percent cover annotations
+
+Percent cover of substrate types is annotated using a point count approach in TransectMeasure software from [SEAGIS](https://www.seagis.com.au/). Random points at a density of 5 points.m^-2^) were thrown into the measured quadrat and annotated for 16 categories, including 3 matrix-forming coral species distinguished into live vs. dead, 4 other biogenic substrates, 5 non-biogenic substrate types and a not-scorable' category where no category could be assigned due to image limitation or obstruction by mobile fauna. The CATAMI classification ([Althaus et al. 2015](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0141039)) was used to define the substrate categories. Descriptive codes were used for each category for ease of data manipulation.
+
+Codes and descriptions of the point categories used: 
+
+* SC-ENLP: Cnidaria - Stony corals - Enalopsammia (live)
+* SC-SOL: Cnidaria - Stony corals - Solenosmilia (live)
+* SC-MAD: Cnidaria - Stony corals - Madrepora (live)
+* SU-ENLP: Cnidaria - Stony corals - Enalopsammia (dead)
+* SU-SOL: Cnidaria - Stony corals - Solenosmilia (dead)
+* SU-MAD: Cnidaria - Stony corals - Madrepora (dead)
+* SU-BCOR: Unconsolidate - Biogenic - Coral Rubble 
+* SU-BBAR: Unconsolidate - Biogenic - Barnacle plates
+* SU-BOTH: Unconsolidate - Biogenic - other
+* SU-CONBIO: Consolidate - Biogenic - other (note this substrate types was not consistentlly recorded combine with xxx)
+* SU-ROK: Consolidate - Rock
+* SU-BOL: Consolidate - Boulder
+* SU-COB: Consolidate - Cobbles
+* SU-PEBGRAV: Unconsolidate - Pebble - gravel
+* SU-SAMU: Unconsolidate - Sand/mud
+* NS: Unscorable
+
+In addition to the annotations of the random points an overall classification of the whole image was applied to capture the overall impression, especially with regard to potential past fishing impact.
+Looking into the overview scores of potential gear impacts for still images. 
+
+# Data preparation and cleaning
+
+## 1. Percent cover data
+
+The TM raw output data set is a concatenation of all TM project outputs. Each of the output files consist of the point annotations within images and the 'user defined' point annotation for the entire image. The raw data extract is tidied up using the separate R script **Tidy_TM_Concat_data.R**. This separates the raw data into overview annotations and point annotations and transformed into percent cover by substrate category for each image. Then the latter are linked to image geolocation information and written out to .cvs as column-format data (PCcover.csv) and as matrix format (PCcoverbyImage.csv), for use in further analyses and for mapping in QGIS.
+
+The overview annotations were separated out from percent cover data and grouped by perceived certainty that anthropogenic impacts were observed: groups 1 to 4 impact is likely to have occurred, groups 7-9 impact is unlikely to have occurred.
+
+
+```{r TbImpOv, tab.cap ="Overviw categories that were scored, grouped by perceived certainty into impact groups and classes"} 
+PCcoverbyImage <- read_csv("Results/PCcoverbyImage.csv")
+# data exploration for overview scoring
+OvCat<- PCcoverbyImage %>% 
+  group_by(OV_CAT, ImpGroup, ImpClass) %>% 
+  summarise(cntRec = n()) %>% 
+  arrange(ImpClass)
+
+ kable(OvCat, caption="overview categories scored")
+```
+
+    
+# Data exploration
+
+Inital data summaries and plots based on the by image operations details and the five .csv files written out by the data cleaning process. 
+
+```{r data loading}
+# read all stills data and make depth numeric
+
+AllSTills <- read_csv("data/IN2018_V06_AllStills.csv") %>% 
+  mutate(depth=as.numeric(Z)) %>% 
+  select(-c(Z))
+
+
+PC_cover <- read_csv("Results/PCcover.csv")
+
+VMEanno_DensQ <- read_csv("Results/VMEanno_DensQ.csv")
+VMEanno_PCcoral <- read_csv("Results/VMEanno_PCcoral.csv")
+
+
+SelectedStlls <- AllSTills %>% 
+  filter(`Selection round (1 orig sel, 2 replacement)` == 1 |
+           `Selection round (1 orig sel, 2 replacement)` == 2 |
+           `Selection round (1 orig sel, 2 replacement)` == 3) 
+
+NSNR <-  SelectedStlls %>% 
+  filter(RAN_SEL_STAT == "NS-NR") 
+
+```
+
+In total 5985 images were potentially targeted for annotation, of these `r nrow(PCcoverbyImage)` have been annotated for percent cover of substrate types, and `r nrow(NSNR)` were identified as unsuitable for annotation and could not be replaced. 
+
+```{r TbTRansects, tab.cap ="Overviw of tansects with annotations"}
+PC_done <- PCcoverbyImage %>% 
+  group_by(SVY_OPS) %>% 
+  summarise(PCdone=n())
+
+
+## NOTE will need to limit the data here to target ops only
+Target <- AllSTills %>% 
+  group_by(SVY_OPS, MapLoc, `Target RANSMPL (1/10)`) %>% 
+  filter(`Selection round (1 orig sel, 2 replacement)` == 1 |
+           `Selection round (1 orig sel, 2 replacement)` == 2 |
+           `Selection round (1 orig sel, 2 replacement)` == 3) %>%
+  filter(RAN_SEL_STAT != "R") %>% 
+  summarise(Selected = n()) %>% 
+  left_join(PC_done, by=c("SVY_OPS"="SVY_OPS")) 
+
+#tried to call this in text xxx with `r view(nTarget)` but doesn't work
+
+kable(Target[1:5], caption="By operation processing summary")
+
+```
+The depth distribution of the data set 
+
+```{r FigDAtadpth, fig.cap = "depth distribution of the annotated imagery"}
+
+PCcoverbyImage %>% 
+  ggplot(aes(x = depth)) +
+  facet_wrap(~ MapLoc) +
+  geom_histogram(bins=10)
+
+```
+
+
+## 1. Percent cover
+
+In total  `r nrow(PCcoverbyImage)` randomly selected images have been annotated for percent cover to date. In total `r nrow(PC_done)` operations have been (at least partially) annotated.  
+
+
+```{r TbPCcoversummary, tab.cap ="Overviw of substrate scores" }
+
+# check out the substrate codes that were annotated
+
+PCsum <- PC_cover %>% 
+  group_by(L2_Code) %>% 
+  summarise(meanPCcover= mean(PC_cover), PresNo_Images = n())
+
+kable(PCsum [1:3], caption="Summary of the data distribution across the targeted substrate types")
+
+```
+
+The depth distribution of the live and dead coral matrix are of particular interest in looking at the depth distribution of the substrate types. 
+
+```{r FigSubstDpth, fig.cap="Depth distribution of substrate types summary graph"}
+#distribution of the substrate types
+# create a vector with the sequence of the substrate types for ordering them in a meaningful way
+SubstSeq <- c('SC-ENLP',
+              'SU-ENLP',
+              'SC-SOL',
+              'SU-SOL',
+              'SC-MAD',
+              'SU-MAD',
+              'SU-BCOR',
+              'SU-BBAR',
+              'SU-BOTH',
+              'SU-ROK',
+              'SU-BOL',
+              'SU-COB',
+              'SU-CONBIO',
+              'SU-PEBGRAV',
+              'SU-SAMU',
+              'NS')
+ggplot(PC_cover,
+       mapping= aes(x=factor(L2_Code, level =SubstSeq),              #call the pre existing vector
+                    y=depth,
+                    size=PC_cover)
+  )+
+  geom_point(alpha=0.2)+
+  scale_y_reverse() +                            # reverse y-axis because it represents ocean depth 
+  theme(axis.text.x = element_text(angle = 90))+   # rotate the label on x-axis
+  labs(x="substrate type", y="depth")
+
+```
+
+
+```{r FigImpactdata, eval = FALSE, out.width='100%', fig.align='center', fig.cap="Impact overview evaluation"}
+PCcoverbyImage %>% 
+  ggplot(aes(x = depth,
+             y = `SU-BCOR`,
+             colour = ImpClass))+
+  geom_point(alpha=0.2)+
+  facet_wrap(~MapLoc)
+
+PCcoverbyImage %>% 
+  ggplot(aes(x = depth,
+             y = (`SU-SOL`+ `SC-SOL`),
+             colour = ImpClass))+
+  geom_point(alpha=0.2)+
+  facet_wrap(~MapLoc)
+
+PC_cover %>% 
+   group_by(L2_Code) %>% 
+   ggplot(aes(x = ImpClass,
+              y = mean(PC_cover),
+              fill = L2_Code)) +
+     geom_col() +
+   theme(axis.text.x.bottom = element_text(angle = 90))
+
+PCcoverbyImage %>% 
+  ggplot(aes(x = depth,
+             y = (`SU-SOL`+ `SC-SOL`+`SU-BCOR`),
+             colour = ImpClass))+
+  geom_point(alpha=0.2)+
+  facet_wrap(~MapLoc) 
+
+```
+
+
+Looking at the distribution of the 'imact groups and classes by map location give us the ability to judge which seamounts to target for further analyses 
+
+```{r FigSMImpact, out.width='100%', fig.height= 20, fig.width=10, fig.align='center', fig.cap="Overview of impact scores over depth for each seamount"}
+
+colpal <-  c("grey",
+            "blue",
+             "cyan",
+             "purple",
+             "Orchid",
+             "green",
+             "orange",
+             "red",
+             "brown",
+             "black")
+ggplot(PC_cover,
+       mapping = aes(x=factor(ImpClass),              #call the pre existing vector
+                    y=depth,
+                    colour = factor(ImpGroup)))+
+  geom_point(alpha=0.2)+
+  scale_y_reverse() +                            # reverse y-axis because it represents ocean depth 
+  theme(axis.text.x = element_text(angle = 90))+   # rotate the label on x-axis
+  scale_color_manual(values = colpal)+
+  labs(x="Impactclass", y="depth")+
+  facet_wrap(~MapLoc, ncol = 4)
+
+
+```
+
+Atoll, Pedra, Mongrel, Main Matt, Punch's Hill, Sisters, St. Helens, all seamounts with known history of fishing show impact certain signs of impact, but also areas of supposed refuge. Although Hill K1 and Hill U were considered 'unfished', they show a similar spread of impact classes as the fished seamounts. of the rest, z16 and z4 are interesting as the overview scores here showed shaved matrix and rubble (group 1) or rubble with clumps (group 2) on one hand and supposedly undisturbed habitats (groups7-9) but very little in the intermediate groups.
+
+Distribution of the substrate types by the locations mentioned above - here the seamounts from the recovery time series are selected. 
+
+```{r FigPCpies, fig.cap="**Pie charts of substrate distribution at selected locations"}
+# currentl the pie graphs are not run for the knittin...
+Atoll <- PC_cover %>% 
+  filter(MapLoc=="Atoll") %>% 
+  ggplot(Atoll,
+       mapping= aes(x="", 
+                    y=PC_cover,               
+                    fill=factor(L2_Code, level =SubstSeq)
+       ))+
+    geom_bar(stat="identity", width=1)+
+    ggtitle("Atoll")+
+    coord_polar("y", start=0)+
+  theme(legend.text = element_text (size=5))+
+  theme(legend.position = 'bottom')
+  
+Atoll
+
+Pedra <- PC_cover %>% 
+  filter(MapLoc=="Pedra") %>% 
+  ggplot(Pedra,
+       mapping= aes(x="", 
+                    y=PC_cover,               
+                    fill=factor(L2_Code, level =SubstSeq)
+       ))+
+    geom_bar(stat="identity", width=1)+
+      ggtitle("Pedra")+
+    coord_polar("y", start=0)+
+  theme(legend.text = element_text (size=5))+
+  theme(legend.position = 'bottom')
+Pedra
+
+Mongrel <- PC_cover %>% 
+  filter(MapLoc=="Mongrel") %>% 
+  ggplot(Mongrel,
+       mapping= aes(x="", 
+                    y=PC_cover,               
+                    fill=factor(L2_Code, level =SubstSeq)
+       ))+
+    geom_bar(stat="identity", width=1)+
+      ggtitle("Mongrel")+
+    coord_polar("y", start=0)+
+  theme(legend.text = element_text (size=5))+
+  theme(legend.position = 'bottom')
+Mongrel
+
+MainMatt <- PC_cover %>% 
+  filter(MapLoc=="Main Matt") %>% 
+  ggplot(MainMatt,
+       mapping= aes(x="", 
+                    y=PC_cover,               
+                    fill=factor(L2_Code, level =SubstSeq)
+       ))+
+    geom_bar(stat="identity", width=1)+
+      ggtitle("Main Matt")+
+   coord_polar("y", start=0)+
+  theme(legend.text = element_text (size=5))+
+  theme(legend.position = 'bottom')
+MainMatt
+
+
+Punch <- PC_cover %>% 
+  filter(MapLoc=="Punch's Hill") %>% 
+  ggplot(Punch,
+       mapping= aes(x="", 
+                    y=PC_cover,               
+                    fill=factor(L2_Code, level =SubstSeq)
+       ))+
+    geom_bar(stat="identity", width=1)+
+      ggtitle("Punch's Hill")+
+   coord_polar("y", start=0)+
+  theme(legend.text = element_text (size=5))+
+  theme(legend.position = 'bottom')
+Punch
+
+Sisters <- PC_cover %>% 
+  filter(MapLoc=="Sisters") %>% 
+  ggplot(Sisters,
+       mapping= aes(x="", 
+                    y=PC_cover,               
+                    fill=factor(L2_Code, level =SubstSeq)
+       ))+
+    geom_bar(stat="identity", width=1)+
+      ggtitle("Sisters")+
+   coord_polar("y", start=0)+
+  theme(legend.text = element_text (size=5))+
+  theme(legend.position = 'bottom')
+Sisters
+
+StHels <- PC_cover %>% 
+  filter(MapLoc=="St Helens") %>% 
+  ggplot(StHels,
+       mapping= aes(x="", 
+                    y=PC_cover,               
+                    fill=factor(L2_Code, level =SubstSeq)
+       ))+
+    geom_bar(stat="identity", width=1)+
+      ggtitle("St Helens")+
+   coord_polar("y", start=0)+
+  theme(legend.text = element_text (size=5))+
+  theme(legend.position = 'bottom')
+StHels
+
+Hill_U <- PC_cover %>% 
+  filter(MapLoc=="Hill U") %>% 
+  ggplot(Hill_U,
+       mapping= aes(x="", 
+                    y=PC_cover,               
+                    fill=factor(L2_Code, level =SubstSeq)
+       ))+
+   geom_bar(stat="identity", width=1)+
+      ggtitle("Hill_U")+
+   coord_polar("y", start=0)+
+  theme(legend.text = element_text (size=5))+
+  theme(legend.position = 'bottom')
+Hill_U
+
+Hill_K1 <- PC_cover %>% 
+  filter(MapLoc=="Hill K1") %>% 
+  ggplot(Hill_K1,
+       mapping= aes(x="", 
+                    y=PC_cover,               
+                    fill=factor(L2_Code, level =SubstSeq)
+       ))+
+   geom_bar(stat="identity", width=1)+
+      ggtitle("Hill_K1")+
+   coord_polar("y", start=0)+
+  theme(legend.text = element_text (size=5))+
+  theme(legend.position = 'bottom')
+Hill_K1
+
+z16 <- PC_cover %>% 
+  filter(MapLoc=="z16") %>% 
+  ggplot(z16,
+       mapping= aes(x="", 
+                    y=PC_cover,               
+                    fill=factor(L2_Code, level =SubstSeq)
+       ))+
+   geom_bar(stat="identity", width=1)+
+      ggtitle("z16")+
+   coord_polar("y", start=0)+
+  theme(legend.text = element_text (size=5))+
+  theme(legend.position = 'bottom')
+z16
+
+z4 <- PC_cover %>% 
+  filter(MapLoc=="z4") %>% 
+  ggplot(z4,
+       mapping= aes(x="", 
+                    y=PC_cover,               
+                    fill=factor(L2_Code, level =SubstSeq)
+       ))+
+   geom_bar(stat="identity", width=1)+
+      ggtitle("z4")+
+   coord_polar("y", start=0)+
+  theme(legend.text = element_text (size=5))+
+  theme(legend.position = 'bottom')
+z4
+
+#plot_grid(Atoll,Pedra, Mongrel, MainMatt, Punch, Sisters, StHels, Hill_U, Hill_K1, z16, z4, ncol = 2)
+
+```
+
+
+
+
+
+
