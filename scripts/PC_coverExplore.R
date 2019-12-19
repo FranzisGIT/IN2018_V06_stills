@@ -372,3 +372,33 @@ PC_cover %>%
 OV1 %>% 
   left_join(AllSTills, by=c("image_key"="KEY")) %>% 
   write_csv("Results/ImapactsTemp.csv")
+
+PCcoverbyImage %>% 
+  ggplot(aes(x = depth,
+             y = (`SU-SOL`+ `SC-SOL`+`SU-BCOR`),
+             colour = ImpClass))+
+  geom_point(alpha=0.2)+
+  facet_wrap(~MapLoc) 
+
+colpal <-  c("grey",
+            "blue",
+             "cyan",
+             "purple",
+             "Orchid",
+             "green",
+             "orange",
+             "red",
+             "brown",
+             "black")
+ggplot(PC_cover,
+       mapping = aes(x=factor(ImpClass),              #call the pre existing vector
+                    y=depth,
+                    colour = factor(ImpGroup)))+
+  geom_point(alpha=0.2)+
+  scale_y_reverse() +                            # reverse y-axis because it represents ocean depth 
+  theme(axis.text.x = element_text(angle = 90))+   # rotate the label on x-axis
+  scale_color_manual(values = colpal)+
+  labs(x="Impactclass", y="depth")+
+  facet_wrap(~MapLoc)
+
+
