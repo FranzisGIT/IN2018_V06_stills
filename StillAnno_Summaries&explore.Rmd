@@ -186,7 +186,7 @@ kable(PCsum [1:3], caption="Summary of the data distribution across the targeted
 
 The depth distribution of the live and dead coral matrix are of particular interest in looking at the depth distribution of the substrate types. 
 
-```{r FigSubstDpth, fig.cap="Depth distribution of substrate types summary graph"}
+```{r FigSubstDpth, fig.height= 8, fig.width=10, fig.align='center', fig.cap="Depth distribution of substrate types summary graph"}
 #distribution of the substrate types
 # create a vector with the sequence of the substrate types for ordering them in a meaningful way
 SubstSeq <- c('SC-ENLP',
@@ -205,15 +205,36 @@ SubstSeq <- c('SC-ENLP',
               'SU-PEBGRAV',
               'SU-SAMU',
               'NS')
+# create a unique colour scheme for substrate types
+SubstCol <- c('SC-ENLP' = "yellow",
+              'SU-ENLP'= "yellow3",
+              'SC-SOL'= "deeppink",
+              'SU-SOL'="hotpink1",
+              'SC-MAD'= "darkorchid1",
+              'SU-MAD' = "darkorchid4",
+              'SU-BCOR' = "orange",
+              'SU-BBAR' = "orange3",
+              'SU-BOTH' = "orange4",
+              'SU-ROK' = "blue",
+              'SU-BOL' = "dodgerblue",
+              'SU-COB' = "dodgerblue3",
+              'SU-CONBIO' = "cyan3",
+              'SU-PEBGRAV'= "cyan",
+              'SU-SAMU' = "palegreen",
+              'NS' = "black")
 ggplot(PC_cover,
        mapping= aes(x=factor(L2_Code, level =SubstSeq),              #call the pre existing vector
                     y=depth,
-                    size=PC_cover)
+                    size=PC_cover,
+                    colour=L2_Code)
   )+
   geom_point(alpha=0.2)+
   scale_y_reverse() +                            # reverse y-axis because it represents ocean depth 
   theme(axis.text.x = element_text(angle = 90))+   # rotate the label on x-axis
-  labs(x="substrate type", y="depth")
+  labs(x="substrate type", y="depth")+
+  scale_colour_manual(values=SubstCol)+
+  theme(legend.text = element_text (size=7))+
+  theme(legend.position = 'bottom')
 
 ```
 
@@ -231,91 +252,24 @@ PC_cover %>%
 
 Distribution of the substrate types by selected locations - here the seamounts from the recovery time series are selected. 
 
-```{r FigPCpies, eval=FALSE, fig.cap="**Pie charts of substrate distribution at selected locations"}
+```{r FigPCpies1, eval=TRUE, out.width='100%', fig.height= 20, fig.width=10, fig.cap="Pie charts of substrate distribution by locations, using the colour scheme identified above"}
 # currentl the pie graphs are not run for the knittin...
-Fang <- PC_cover %>% 
-  filter(MapLoc=="Fang") %>% 
-  ggplot(Fang,
+PC_cover %>% 
+  group_by(MapLoc, L2_Code) %>% 
+  summarise(totPC = sum(PC_cover)) %>% 
+  ungroup() %>% 
+  group_by(MapLoc) %>% 
+  mutate(PCPC = (100*totPC/sum(totPC))) %>% 
+  ggplot(
        mapping= aes(x="", 
-                    y=PC_cover,               
+                    y=PCPC,               
                     fill=factor(L2_Code, level =SubstSeq)
        ))+
     geom_bar(stat="identity", width=1)+
-    ggtitle("Fang")+
-    coord_polar("y", start=0)
-Fang
-
-MainMatt <- PC_cover %>% 
-  filter(MapLoc=="Main Matt") %>% 
-  ggplot(MainMatt,
-       mapping= aes(x="", 
-                    y=PC_cover,               
-                    fill=factor(L2_Code, level =SubstSeq)
-       ))+
-    geom_bar(stat="identity", width=1)+
-      ggtitle("MainMatt")+
-   coord_polar("y", start=0)
-MainMatt
-
-Pedra <- PC_cover %>% 
-  filter(MapLoc=="Pedra") %>% 
-  ggplot(Pedra,
-       mapping= aes(x="", 
-                    y=PC_cover,               
-                    fill=factor(L2_Code, level =SubstSeq)
-       ))+
-    geom_bar(stat="identity", width=1)+
-      ggtitle("Pedra")+
-    coord_polar("y", start=0)
-Pedra
-
-Sisters <- PC_cover %>% 
-  filter(MapLoc=="Sisters") %>% 
-  ggplot(MainMatt,
-       mapping= aes(x="", 
-                    y=PC_cover,               
-                    fill=factor(L2_Code, level =SubstSeq)
-       ))+
-    geom_bar(stat="identity", width=1)+
-      ggtitle("Sisters")+
-   coord_polar("y", start=0)
-Sisters
-
-z16 <- PC_cover %>% 
-  filter(MapLoc=="z16") %>% 
-  ggplot(z16,
-       mapping= aes(x="", 
-                    y=PC_cover,               
-                    fill=factor(L2_Code, level =SubstSeq)
-       ))+
-   geom_bar(stat="identity", width=1)+
-      ggtitle("z16")+
-   coord_polar("y", start=0)
-z16
-
-Hill_U <- PC_cover %>% 
-  filter(MapLoc=="Hill U") %>% 
-  ggplot(Hill_U,
-       mapping= aes(x="", 
-                    y=PC_cover,               
-                    fill=factor(L2_Code, level =SubstSeq)
-       ))+
-   geom_bar(stat="identity", width=1)+
-      ggtitle("Hill_U")+
-   coord_polar("y", start=0)
-Hill_U
-
-Hill_K1 <- PC_cover %>% 
-  filter(MapLoc=="Hill K1") %>% 
-  ggplot(Hill_U,
-       mapping= aes(x="", 
-                    y=PC_cover,               
-                    fill=factor(L2_Code, level =SubstSeq)
-       ))+
-   geom_bar(stat="identity", width=1)+
-      ggtitle("Hill_K1")+
-   coord_polar("y", start=0)
-Hill_K1
+    coord_polar("y", start=0)+
+  scale_fill_manual(values=SubstCol)+
+  theme(legend.position = 'bottom')+
+  facet_wrap(~MapLoc, ncol = 5)
 
 ```
 
