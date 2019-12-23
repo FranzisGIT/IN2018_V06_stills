@@ -445,6 +445,27 @@ TargetQuads2 <-  VME_TotDens %>%
 
 write_csv(TargetQuads2, "Results/TargetQuads2.csv")
 
+# checking percent cover points versus guesstimate
+
+VME_AnnoAll %>% 
+  ggplot(mapping = aes(x= (`SC-SOL`+`SU-SOL`+ `SC-ENLP`+ `SU-ENLP`+ `SC-MAD` + `SU-MAD`), 
+                       y= (`PC_SolMatrix` + `PC_Sub_CoralReef` + `PC_EnallopMatrix`)))+
+  geom_point()
 
 
+VME_AnnoAll %>% 
+  ggplot(mapping = aes(x= (`SC-SOL`+`SU-SOL`), 
+                       y= PC_SolMatrix))+
+  geom_point()
 
+T1 <- VME_AnnoAll %>% 
+  mutate(point_reef = (`SC-SOL`+`SU-SOL`+ `SC-ENLP`+ `SU-ENLP`+ `SC-MAD` + `SU-MAD`),
+         point_sol = (`SC-SOL`+`SU-SOL`),
+         guess_reef = (`PC_SolMatrix` + `PC_Sub_CoralReef` + `PC_EnallopMatrix`),
+         guess_sol = (`PC_SolMatrix`)) %>% 
+  mutate(diff_reef = (`point_reef` - `guess_reef`),
+         diff_sol = (`point_sol` - `guess_sol`)) %>% 
+  filter(abs(diff_reef) > 25 |
+           abs(diff_sol) > 25  )
+write_csv(T1, "Results/CheckpcReef.csv")
+         
