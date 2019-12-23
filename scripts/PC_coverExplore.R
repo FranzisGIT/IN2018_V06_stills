@@ -401,4 +401,50 @@ ggplot(PC_cover,
   labs(x="Impactclass", y="depth")+
   facet_wrap(~MapLoc)
 
+SubstCol <- c('SC-ENLP' = "yellow",
+              'SU-ENLP'= "yellow3",
+              'SC-SOL'= "deeppink",
+              'SU-SOL'="hotpink1",
+              'SC-MAD'= "darkorchid1",
+              'SU-MAD' = "darkorchid4",
+              'SU-BCOR' = "orange",
+              'SU-BBAR' = "orange3",
+              'SU-BOTH' = "orange4",
+              'SU-ROK' = "blue",
+              'SU-BOL' = "dodgerblue",
+              'SU-COB' = "dodgerblue3",
+              'SU-CONBIO' = "cyan3",
+              'SU-PEBGRAV'= "cyan",
+              'SU-SAMU' = "palegreen",
+              'NS' = "black")
+PC_cover %>% 
+  filter(MapLoc=="Hill U") %>% 
+  ggplot(Hill_U,
+         mapping= aes(x="", 
+                      y=PC_cover,               
+                      fill=factor(L2_Code, level =SubstSeq)
+         ))+
+  geom_bar(stat="identity", width=1)+
+  ggtitle("Hill_U")+
+  coord_polar("y", start=0)+
+  scale_fill_manual(values=SubstCol)
+  theme(legend.text = element_text (size=5))+
+  theme(legend.position = 'bottom')
+  
+
+
+  
+# output list of targeted stills with summary scores for VME taxa and no. annotated points for PC cover 
+T1 <- TargetQuads %>% 
+  left_join(PtsPerImage, by=c("KEY"="image_key")) 
+
+TargetQuads2 <-  VME_TotDens %>% 
+  ungroup() %>% 
+  select(image_key,TotDens, noTaxa) %>% 
+  right_join(T1, by=c("image_key" = "KEY") )
+
+write_csv(TargetQuads2, "Results/TargetQuads2.csv")
+
+
+
 
