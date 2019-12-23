@@ -1,7 +1,7 @@
 # tidying up VME fauna anotations extract from ORACLE BHIMAGE -- extract created using VARS_2018-StillsAnnoExtracts.sql
 # 
 library(tidyverse)
-VMEanno_raw <- read_csv("data/IN2018_V06_STILLS_VME_20191223.csv", na = c("(null)", "NA"))
+VMEanno_raw <- read_csv("data/IN2018_V06_STILLS_VME_20191224.csv", na = c("(null)", "NA"))
 
 # tidy up the CNT column first make No VME fauna a zero and Hydrocorals 1 (presence) then
 # convert numeric values to numbers in new variable so only the counts are stored  
@@ -83,11 +83,11 @@ VMEanno_data1 <- left_join(VMEanno_data, AllSTills, by=c("image_key"="KEY"))
 # check the data for annotations that are not part of the data annotation plan (there is a number entry in Selection round and SelNo - NS replaced)
 glimpse(VMEanno_data1)
 
-check1 <- VMEanno_data2 %>% 
+check1 <- VMEanno_data1 %>% 
   group_by(`Selection round (1 orig sel, 2 replacement)`) %>% 
   summarise(n())
 
-check2 <- VMEanno_data2 %>% 
+check2 <- VMEanno_data1 %>% 
   filter(is.na(`SelNo-NS replaced`))
 
 #CHECK: look at the check1 & check2 file and make sure these are not part of the selection
@@ -99,6 +99,15 @@ VMEanno_data2 <-  VMEanno_data1 %>%
          `Selection round (1 orig sel, 2 replacement)`<100)
 
 glimpse(VMEanno_data2)
+
+# re-run checks
+check1 <- VMEanno_data2 %>% 
+  group_by(`Selection round (1 orig sel, 2 replacement)`) %>% 
+  summarise(n())
+
+check2 <- VMEanno_data2 %>% 
+  filter(is.na(`SelNo-NS replaced`))
+
 #filter out substrate categories where % cover was estimated instead of a count
 
 VMEanno_PCcoral <- VMEanno_data2 %>% 
