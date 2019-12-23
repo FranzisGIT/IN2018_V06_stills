@@ -1,7 +1,7 @@
 # tidying up VME fauna anotations extract from ORACLE BHIMAGE -- extract created using VARS_2018-StillsAnnoExtracts.sql
 # 
 library(tidyverse)
-VMEanno_raw <- read_csv("data/IN2018_V06_STILLS_VME_20191115.csv", na = c("(null)", "NA"))
+VMEanno_raw <- read_csv("data/IN2018_V06_STILLS_VME_20191223.csv", na = c("(null)", "NA"))
 
 # tidy up the CNT column first make No VME fauna a zero and Hydrocorals 1 (presence) then
 # convert numeric values to numbers in new variable so only the counts are stored  
