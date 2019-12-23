@@ -253,7 +253,7 @@ PCcoverbyImage <- PC_cover %>%
                   'SU-ROK'=0,
                   'SU-BOL'=0,
                   'SU-COB'=0,
-                  'SU-CONBIO',
+                  'SU-CONBIO'=0,
                   'SU-PEBGRAV'=0,
                   'SU-SAMU'=0,
                   'NS' = 0)) %>% 
