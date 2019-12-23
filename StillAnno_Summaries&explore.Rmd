@@ -439,7 +439,7 @@ VME_AnnoAll <- PCcoverbyImage %>%
 
 Checking how well the estimated percent cover of coral matrix matches with  measured percent cover of coral matrix (dead & alive) 
 
-```{r FigPCcoverComparison, out.width='100%', fig.align='center', fig.cap="Comparison of estimated and measured percent cover of matrix"}
+```{r FigPCcoverComparison, out.width='100%', fig.align='center', fig.cap="Comparison of estimated and measured percent cover of Solenosmilia matrix"}
 
 VME_AnnoAll %>% 
   ggplot(mapping = aes(x= (`SC-SOL`+`SU-SOL`), 
@@ -450,7 +450,20 @@ estVmeas_lm <- lm(PC_SolMatrix ~ (`SC-SOL`+`SU-SOL`), data = VME_AnnoAll)
 
 estVmeas_lm
 ```
+
+
+```{r FigPCcoverAllreef, out.width='100%', fig.align='center', fig.cap="Comparison of estimated and measured percent cover of all types of coral matrix"}
+
+VME_AnnoAll %>% 
+  ggplot(mapping = aes(x= (`SC-SOL`+`SU-SOL`+ `SC-ENLP`+ `SU-ENLP`+ `SC-MAD` + `SU-MAD`), 
+                     y= (`PC_SolMatrix` + `PC_Sub_CoralReef` + `PC_EnallopMatrix`)))+
+   geom_point()
+
+
+```
+
 checking out the distribution of VME taxa over coral matrix substrates.
+
 ```{r MyFig4, fig.align='center', fig.height= 4, fig.width=10,  fig.cap="Relationship between density of VME taxa and percent cover of matrix forming coral"}
 VMEanno_DensQ %>% 
   left_join(PCcoverbyImage, by=c("image_key"="image_key")) %>% 
@@ -462,6 +475,10 @@ VMEanno_DensQ %>%
   labs(x="% cover coral matrix (dead and alive)", y="density of VME taxa (ind./m2)")+
   facet_wrap(~CONCEPT, scales = "free_y")
 ```
+
+
+
+## Impacts - overview dta from PC cover analyses
 
 Looking into the overview scores of potential gear impacts for still images 
 
