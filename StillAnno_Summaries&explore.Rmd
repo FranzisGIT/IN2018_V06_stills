@@ -320,7 +320,7 @@ In total there are `r nrow(VMEannoMatrix)` randomly selected images have been an
 ```{r, FigPCExp,  fig.cap="*Frequency distribution of a) total density of VME data and b) total number of taxa "}
 # looking at the distribution of density and number of taxa over the whole data set
 VME_TotDens <- VMEanno_DensQ %>% 
-  filter(CONCEPT != "No-VMEfauna") %>% 
+  #filter(CONCEPT != "No-VMEfauna") %>% 
   group_by(image_key, SVY_OPS, MapLoc, depth) %>% 
   summarise(TotDens=sum(Dens),
             noTaxa=sum(NoTypes)) 
@@ -446,11 +446,24 @@ VME_AnnoAll %>%
                      y= PC_SolMatrix))+
    geom_point()
 
-estVmeas_lm <- lm(PC_SolMatrix ~ (`SC-SOL`+`SU-SOL`), data = VME_AnnoAll)
 
-estVmeas_lm
 ```
 
+A linear regression of these data shows the following
+
+```{r linRegSol}
+TempLM <- VME_AnnoAll %>% 
+  mutate(PCsol = (`SC-SOL`+`SU-SOL`),
+         GPCsol = (`PC_SolMatrix`),
+         PCreef = (`SC-SOL`+`SU-SOL`+ `SC-ENLP`+ `SU-ENLP`+ `SC-MAD` + `SU-MAD`),
+         GPCreef = (`PC_SolMatrix` + `PC_Sub_CoralReef` + `PC_EnallopMatrix`))
+Linear_SOLmatrix <-  lm(GPCsol ~ PCsol, data=TempLM)
+
+#Longer summary of the model
+summary(Linear_SOLmatrix)
+```
+
+Looking at the combined reef categories:
 
 ```{r FigPCcoverAllreef, out.width='100%', fig.align='center', fig.cap="Comparison of estimated and measured percent cover of all types of coral matrix"}
 
@@ -459,12 +472,48 @@ VME_AnnoAll %>%
                      y= (`PC_SolMatrix` + `PC_Sub_CoralReef` + `PC_EnallopMatrix`)))+
    geom_point()
 
+```
+
+A linear regression of these data shows the following: 
+
+```{r linRegReef}
+TempLM <- VME_AnnoAll %>% 
+  mutate(PCreef = (`SC-SOL`+`SU-SOL`+ `SC-ENLP`+ `SU-ENLP`+ `SC-MAD` + `SU-MAD`),
+         GPCreef = (`PC_SolMatrix` + `PC_Sub_CoralReef` + `PC_EnallopMatrix`))
+Linear_REEF <-  lm(GPCreef ~ PCreef, data=TempLM)
+
+#Longer summary of the model
+summary(Linear_REEF)
+```
+
+
+Considering the relationship of the number of live heads counted versus the percent cover by live _Solenosmilia_ there appears to be a much better fit.
+
+
+```{r CFliveSol, out.width='100%', fig.align='center', fig.cap="Comparison of density of live solenosmilia heads and measured percent cover of live Solenosmilia, with a smoothed linear regression line"}
+
+VME_AnnoAll %>% 
+  ggplot(mapping = aes(x= (`SC-SOL`), 
+                       y= S.variabilis))+
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE)
 
 ```
 
-checking out the distribution of VME taxa over coral matrix substrates.
+A linear of these dta regression has R^2^ of 0.555:
 
-```{r MyFig4, fig.align='center', fig.height= 4, fig.width=10,  fig.cap="Relationship between density of VME taxa and percent cover of matrix forming coral"}
+```{r linRegLive}
+# linear regression of head count vs pc cover live
+Linear_SOL_live <- lm(`S.variabilis` ~ (`SC-SOL`), data = VME_AnnoAll)
+
+#Longer summary of the model
+summary(Linear_SOL_live)
+
+```
+
+The distribution of VME taxa over coral matrix substrates are graphed below.
+
+```{r MyFig4, fig.align='center', fig.height= 7, fig.width=10,  fig.cap="Relationship between density of VME taxa and percent cover of matrix forming coral"}
 VMEanno_DensQ %>% 
   left_join(PCcoverbyImage, by=c("image_key"="image_key")) %>% 
   filter((`SC-SOL`+`SU-SOL`) != 0) %>% 
@@ -473,7 +522,7 @@ VMEanno_DensQ %>%
                      ))+
    geom_point()+
   labs(x="% cover coral matrix (dead and alive)", y="density of VME taxa (ind./m2)")+
-  facet_wrap(~CONCEPT, scales = "free_y")
+  facet_wrap(~CONCEPT, ncol=4, scales = "free_y")
 ```
 
 
