@@ -438,6 +438,13 @@ PC_cover %>%
 T1 <- TargetQuads %>% 
   left_join(PtsPerImage, by=c("KEY"="image_key")) 
 
+# THIS IS PART OF MARKDOWN...looking at the distribution of density and number of taxa over the whole data set
+VME_TotDens <- VMEanno_DensQ %>% 
+  #filter(CONCEPT != "No-VMEfauna") %>% 
+  group_by(image_key, SVY_OPS, MapLoc, depth) %>% 
+  summarise(TotDens=sum(Dens),
+            noTaxa=sum(NoTypes)) 
+
 TargetQuads2 <-  VME_TotDens %>% 
   ungroup() %>% 
   select(image_key,TotDens, noTaxa) %>% 
@@ -466,6 +473,17 @@ T1 <- VME_AnnoAll %>%
   mutate(diff_reef = (`point_reef` - `guess_reef`),
          diff_sol = (`point_sol` - `guess_sol`)) %>% 
   filter(abs(diff_reef) > 25 |
-           abs(diff_sol) > 25  )
+           abs(diff_sol) > 25  ) %>% 
+  left_join(PtsPerImage, by=c("image_key" ="image_key"))
+  
 write_csv(T1, "Results/CheckpcReef.csv")
-         
+
+write_csv(Target, "Results/transectSummary.csv")
+     
+
+VME_AnnoAll %>% 
+  ggplot(mapping = aes(x= (`SC-SOL`), 
+                       y= S.variabilis))+
+  geom_point()
+
+    
