@@ -126,18 +126,15 @@ VMEanno_Dens <- VMEanno_data2 %>%
            CONCEPT !="Solenosmilia matrix" ) %>%   
     mutate(Dens = Count/`QUAD-Size`) 
 
-# rerun check1 & check2 to ensure the data was deleted.
 
+# check out that concepts were separated correctly
 VMEanno_PCcoral %>% 
   group_by(CONCEPT) %>% 
   summarise(n())
 
 VMEanno_Dens %>% 
   group_by(CONCEPT) %>% 
-  summarise(n())
-
-
-# write out data to results for new scipt commented out - need more manipulation first
+  summarise(n(), TotDens=sum(Dens))
 
 
 # 
@@ -146,9 +143,11 @@ VMEannoPimageConc <- VMEanno_Dens %>%
   summarise(Count=sum(Count),
             Dens=sum(Dens),
             NoTypes=n())
+
 #identify where comments need to be looked at to separate concept types
 multi_type <- VMEannoPimageConc %>% 
   filter(NoTypes>1)
+
 
 # spread the data into a by image matrix format and adding the geolocation data and export to .csv for taking into QGIS maps
 #NOTE if error occurs at this step check the raw data records that caused it - e.g. duplicate data entry with same/different values - correct data enry at VARS end and re-extract
@@ -170,6 +169,7 @@ t2 <- VMEanno_PCcoral %>%
 
 VMEannoMatrix <- full_join(t1, t2, by=c("image_key"="image_key")) %>% 
   replace_na(list(`Black & Octocorals` = 0,
+                  `Black & Octocorals: Encrusting` = 0,
                   `Brisingid` = 0,
                   `D.horridus` = 0,
                   `Enallopsammia` = 0,
@@ -177,12 +177,13 @@ VMEannoMatrix <- full_join(t1, t2, by=c("image_key"="image_key")) %>%
                   `Hydrocorals: Branching` = 0,
                   `Irregular urchins` = 0,
                   `Madrepora` = 0,
-                  `No-VMEfauna` = 0,
+                  #`No-VMEfauna` = 0,
                   `Regular urchins` = 0,
                   `S.variabilis` = 0,
                   `Sponges` = 0,
                   `Stalked crinoids` = 0,
                   `Stony corals` = 0,
+                  `Stony corals: solitary` = 0,
                   `True anemones: Fourlobed` = 0,
                   `Unstalked crinoids` = 0,
                   PC_Sub_CoralReef = 0,
