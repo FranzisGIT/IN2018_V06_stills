@@ -513,7 +513,7 @@ summary(Linear_SOL_live)
 
 The distribution of VME taxa over coral matrix substrates are graphed below.
 
-```{r MyFig4, fig.align='center', fig.height= 7, fig.width=10,  fig.cap="Relationship between density of VME taxa and percent cover of matrix forming coral"}
+```{r MyFig4, fig.align='center', fig.height= 7, fig.width=10,  fig.cap="Relationship between density of VME taxa and percent cover of dead & alive matrix forming coral"}
 VMEanno_DensQ %>% 
   left_join(PCcoverbyImage, by=c("image_key"="image_key")) %>% 
   filter((`SC-SOL`+`SU-SOL`) != 0) %>% 
@@ -526,6 +526,30 @@ VMEanno_DensQ %>%
 ```
 
 
+```{r MyFig5, fig.align='center', fig.height= 7, fig.width=10,  fig.cap="Relationship between density of VME taxa and percent cover of live Solenosmila"}
+VMEanno_DensQ %>% 
+  left_join(PCcoverbyImage, by=c("image_key"="image_key")) %>% 
+  filter((`SC-SOL`) != 0) %>% 
+    ggplot(mapping = aes(x= (`SC-SOL`), 
+                     y= Dens
+                     ))+
+   geom_point()+
+  labs(x="% cover live Solenosmilia)", y="density of VME taxa (ind./m2)")+
+  facet_wrap(~CONCEPT, ncol=4, scales = "free_y")
+```
+
+
+```{r MyFig6, fig.align='center', fig.height= 7, fig.width=10,  fig.cap="Relationship between density of VME taxa and percent cover of dead Solenosmila"}
+VMEanno_DensQ %>% 
+  left_join(PCcoverbyImage, by=c("image_key"="image_key")) %>% 
+  filter((`SU-SOL`) != 0) %>% 
+    ggplot(mapping = aes(x= (`SU-SOL`), 
+                     y= Dens
+                     ))+
+   geom_point()+
+  labs(x="% cover dead Solenosmilia)", y="density of VME taxa (ind./m2)")+
+  facet_wrap(~CONCEPT, ncol=4, scales = "free_y")
+```
 
 ## Impacts - overview dta from PC cover analyses
 
