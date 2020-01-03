@@ -1,7 +1,7 @@
-# tidying up VME fauna anotations extract from ORACLE BHIMAGE -- extract created using VARS_2018-StillsAnnoExtracts.sql
+# tidying up VME fauna anotations extract from ORACLE BHIMAGE -- extract created using VARS_2018-StillsAnnoExtracts.sql with condition T1.IMAGE_DESCRIPTION LIKE 'Q%' turbed on 
 # 
 library(tidyverse)
-VMEanno_raw <- read_csv("data/IN2018_V06_STILLS_VME_20191224.csv", na = c("(null)", "NA"))
+VMEanno_raw <- read_csv("data/IN2018_V06_STILLS_VME_20200103.csv", na = c("(null)", "NA"))
 
 # tidy up the CNT column first make No VME fauna a zero and Hydrocorals 1 (presence) then
 # convert numeric values to numbers in new variable so only the counts are stored  
@@ -91,6 +91,9 @@ check2 <- VMEanno_data1 %>%
   filter(is.na(`SelNo-NS replaced`))
 
 #CHECK: look at the check1 & check2 file and make sure these are not part of the selection
+check2Sumary <- check2 %>% 
+  group_by(image_key) %>% 
+  summarise(n())
 # if sure, remove the data entries where `Selection round (1 orig sel, 2 replacement)` or `SelNo-NS eplaced` is NA 
 
 VMEanno_data2 <-  VMEanno_data1 %>% 
