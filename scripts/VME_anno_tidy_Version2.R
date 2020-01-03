@@ -1,7 +1,7 @@
-# tidying up VME fauna anotations extract from ORACLE BHIMAGE -- extract created using VARS_2018-StillsAnnoExtracts.sql with condition T1.IMAGE_DESCRIPTION LIKE 'Q%' turbed on 
+# tidying up VME fauna anotations extract from ORACLE BHIMAGE -- extract created using VARS_2018-StillsAnnoExtracts.sql with condition T1.IMAGE_DESCRIPTION LIKE 'SCP' 
 # 
 library(tidyverse)
-VMEanno_raw <- read_csv("data/IN2018_V06_STILLS_VME_20191224.csv", na = c("(null)", "NA"))
+VMEanno_raw <- read_csv("data/IN2018_V06_STILLS_VME_20190103.csv", na = c("(null)", "NA"))
 
 # tidy up the CNT column first make No VME fauna a zero and Hydrocorals 1 (presence) then
 # convert numeric values to numbers in new variable so only the counts are stored  
@@ -15,12 +15,12 @@ Temp1 <- VMEanno_raw %>%
 # create ID variables for linking these data to PC cover and stills tibbles
 
 VMEanno_IDs <- Temp1  %>% 
-  mutate(ImageName = str_sub(IMAGE_URL, start=85, end=139),   # identify image filename (without .jpg)
-         ImageNo = str_sub(ImageName, start=48, end=51),      # pick out image number
-         RanSelNo = str_sub(ImageName, start=2, end=4),       # pick out random selection number
+  mutate(ImageName = str_sub(IMAGE_URL, start=85, end=134),   # identify image filename (without .jpg)
+         ImageNo = str_sub(ImageName, start=43, end=46),      # pick out image number
+        # RanSelNo = str_sub(ImageName, start=2, end=4),       # pick out random selection number
          OpsNo = str_sub(SURVEY_OPS, start=12, end=14),       # this picks the operation number out
-         image_key = paste(OpsNo,"_",ImageNo, sep=""),        #create the image_key
-         ranSel_key = paste(OpsNo,"_",RanSelNo, sep=""))    #create the random selection key
+         image_key = paste(OpsNo,"_",ImageNo, sep=""))        #create the image_key
+        # ranSel_key = paste(OpsNo,"_",RanSelNo, sep=""))    #create the random selection key
 
 # separate out comments from counts, look at the concepts that were recorded
 
