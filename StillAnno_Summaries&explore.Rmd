@@ -92,7 +92,8 @@ Note, at this stage the overview annotations were separated out from percent cov
 
 ## 2. VME taxa counts
 
-The VME taxon counts are extracted from the VARS Oracle data base using the script **VARS_2018-StillsAnnoExtracts.sql**. The raw data extract is tidied up using the separate R script **VME_anno_tidy.R**. The non-numrical comments are separated from the counts and percent covers; these are currently not further used. The numeric data is split into percent cover data and the counts. The latter are linked to the quadrat sizes and converted to densities (ind.m^-2^). each of the tables is linked to image geolocation information and written out to .cvs as column-format data (VMEanno_PCcoral.csv and VMEanno_DensQ.csv) and combined as matrix format (VMEannoMatrix.csv), for use in further analyses and for mapping in QGIS.
+The VME taxon counts are extracted from the VARS Oracle data base using the script **VARS_2018-StillsAnnoExtracts.sql** or **VARS_2018-StillsAnnoExtracts_V2.sql**. The raw data extract is tidied up using the separate R script **VME_anno_tidy.R** or **VME_anno_tidy_Version2.R**. The difference between the versions is that the original extracts only dta where a quadrat is in VARS, the latter extracts that for the 'port' images thus including annotations made where the qudrat was not read into VARS.
+The non-numrical comments are separated from the counts and percent covers; these are currently not further used. The numeric data is split into percent cover data and the counts. The latter are linked to the quadrat sizes and converted to densities (ind.m^-2^). each of the tables is linked to image geolocation information and written out to .cvs as column-format data (VMEanno_PCcoral.csv and VMEanno_DensQ.csv) and combined as matrix format (VMEannoMatrix.csv), for use in further analyses and for mapping in QGIS.
 
 Note, at this stage the modifyiers (colour, etc) are not incorporated into the output data.
     
@@ -434,18 +435,43 @@ VME_AnnoAll <- PCcoverbyImage %>%
 #Reading out the data table is commented out
 #kable(VME_AnnoAll [1:42], caption="**Table 3** Combined data matrix (by image) of percent substrate types and VME taxon densities, including the summaries of densities")
 
+# summarising these data by operation to see if the differences average out
+
+Reef_transectSummary <-  VME_AnnoAll %>% 
+ filter(!is.na(`PC_SolMatrix`)) %>%   
+ mutate(PCsol = (`SC-SOL`+`SU-SOL`),
+         GPCsol = (`PC_SolMatrix`),
+         PCreef = (`SC-SOL`+`SU-SOL`+ `SC-ENLP`+ `SU-ENLP`+ `SC-MAD` + `SU-MAD`),
+         GPCreef = (`PC_SolMatrix` + `PC_Sub_CoralReef` + `PC_EnallopMatrix`)) %>% 
+  select(SVY_OPS.x, MapLoc.x, image_key, PCsol, GPCsol, PCreef,  GPCreef) %>% 
+  group_by(SVY_OPS.x, MapLoc.x) %>%
+  summarise(VMEdone=n(),
+            PCSol = sum(PCsol),
+            PCReef = sum(PCreef),
+            GSol = sum(GPCsol),
+            GReef = sum(GPCreef)) %>% 
+  mutate(AVPCSol = (PCSol / VMEdone)) %>% 
+  mutate(AVGSol = (GSol / VMEdone)) %>% 
+  mutate(AVPCReef = (PCReef / VMEdone)) %>% 
+  mutate(AVGReef = (GReef / VMEdone))
 
 ```
 
 Checking how well the estimated percent cover of coral matrix matches with  measured percent cover of coral matrix (dead & alive) 
 
-```{r FigPCcoverComparison, out.width='100%', fig.align='center', fig.cap="Comparison of estimated and measured percent cover of Solenosmilia matrix"}
+```{r FigPCcoverComparison, out.width='100%', fig.align='center', fig.cap="Comparison of estimated and measured percent cover of Solenosmilia matrix for raw data and for averages by operation"}
 
 VME_AnnoAll %>% 
   ggplot(mapping = aes(x= (`SC-SOL`+`SU-SOL`), 
                      y= PC_SolMatrix))+
-   geom_point()
+   geom_point() 
 
+Reef_transectSummary %>% 
+  ggplot(mapping = aes(x= AVPCSol, 
+                       y= AVGSol,
+                       colour = MapLoc.x))+
+  geom_point()
+#+ geom_text(aes(label=SVY_OPS.x))
 
 ```
 
@@ -465,12 +491,19 @@ summary(Linear_SOLmatrix)
 
 Looking at the combined reef categories:
 
-```{r FigPCcoverAllreef, out.width='100%', fig.align='center', fig.cap="Comparison of estimated and measured percent cover of all types of coral matrix"}
+```{r FigPCcoverAllreef, out.width='100%', fig.align='center', fig.cap="Comparison of estimated and measured percent cover of all types of coral matrix for raw data and for averages by operation"}
 
 VME_AnnoAll %>% 
   ggplot(mapping = aes(x= (`SC-SOL`+`SU-SOL`+ `SC-ENLP`+ `SU-ENLP`+ `SC-MAD` + `SU-MAD`), 
                      y= (`PC_SolMatrix` + `PC_Sub_CoralReef` + `PC_EnallopMatrix`)))+
    geom_point()
+
+Reef_transectSummary %>% 
+  ggplot(mapping = aes(x= AVPCReef, 
+                       y= AVGReef,
+                       colour = MapLoc.x))+
+  geom_point()
+#+ geom_text(aes(label=SVY_OPS.x))
 
 ```
 

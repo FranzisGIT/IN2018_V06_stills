@@ -486,4 +486,56 @@ VME_AnnoAll %>%
                        y= S.variabilis))+
   geom_point()
 
+
+check2Sumary <- check2 %>% 
+  group_by(image_key) %>% 
+  summarise(n())
     
+
+VMEannoMatrix %>% 
+  group_by(SVY_OPS) %>% 
+  summarise(VMEdone=n(),
+            Sol = sum(PC_SolMatrix),
+            Cor = sum(PC_Sub_CoralReef),
+            Ennalo = sum(PC_EnallopMatrix)) %>% 
+  mutate(totCORAL = (Sol + Cor + Ennalo)) %>% 
+  mutate(AVReef = (totCORAL / VMEdone)) %>% 
+  write_csv("Results/transectSummarySolMat.csv")
+
+
+Reef_transectSummary <-  VME_AnnoAll %>% 
+ filter(!is.na(`PC_SolMatrix`)) %>%   
+ mutate(PCsol = (`SC-SOL`+`SU-SOL`),
+         GPCsol = (`PC_SolMatrix`),
+         PCreef = (`SC-SOL`+`SU-SOL`+ `SC-ENLP`+ `SU-ENLP`+ `SC-MAD` + `SU-MAD`),
+         GPCreef = (`PC_SolMatrix` + `PC_Sub_CoralReef` + `PC_EnallopMatrix`)) %>% 
+  select(SVY_OPS.x, MapLoc.x, image_key, PCsol, GPCsol, PCreef,  GPCreef) %>% 
+  group_by(SVY_OPS.x, MapLoc.x) %>%
+  summarise(VMEdone=n(),
+            PCSol = sum(PCsol),
+            PCReef = sum(PCreef),
+            GSol = sum(GPCsol),
+            GReef = sum(GPCreef)) %>% 
+  mutate(AVPCSol = (PCSol / VMEdone)) %>% 
+  mutate(AVGSol = (GSol / VMEdone)) %>% 
+  mutate(AVPCReef = (PCReef / VMEdone)) %>% 
+  mutate(AVGReef = (GReef / VMEdone))
+
+Reef_transectSummary %>% 
+  ggplot(mapping = aes(x= AVPCSol, 
+                       y= AVGSol,
+                       colour = MapLoc.x))+
+  geom_point()+
+  geom_text(aes(label=SVY_OPS.x))
+ 
+Reef_transectSummary %>% 
+  ggplot(mapping = aes(x= AVPCReef, 
+                       y= AVGReef,
+                       colour = MapLoc.x))+
+  geom_point()+
+  geom_text(aes(label=SVY_OPS.x))
+ 
+Reef_transectSummary %>% 
+  write_csv("Results/Reef_transectSummary.csv")
+    
+     
