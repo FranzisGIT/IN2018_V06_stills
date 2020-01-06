@@ -456,8 +456,10 @@ write_csv(TargetQuads2, "Results/TargetQuads2.csv")
 
 VME_AnnoAll %>% 
   ggplot(mapping = aes(x= (`SC-SOL`+`SU-SOL`+ `SC-ENLP`+ `SU-ENLP`+ `SC-MAD` + `SU-MAD`), 
-                       y= (`PC_SolMatrix` + `PC_Sub_CoralReef` + `PC_EnallopMatrix`)))+
-  geom_point()
+                       y= (`PC_SolMatrix` + `PC_Sub_CoralReef` + `PC_EnallopMatrix`),
+                       colour = OV_CAT))+
+  geom_point()+
+ geom_text(aes(label = OV_CD))
 
 
 VME_AnnoAll %>% 
@@ -471,12 +473,25 @@ T1 <- VME_AnnoAll %>%
          guess_reef = (`PC_SolMatrix` + `PC_Sub_CoralReef` + `PC_EnallopMatrix`),
          guess_sol = (`PC_SolMatrix`)) %>% 
   mutate(diff_reef = (`point_reef` - `guess_reef`),
-         diff_sol = (`point_sol` - `guess_sol`)) %>% 
+         diff_sol = (`point_sol` - `guess_sol`)) 
+T2 <- T1 %>% 
   filter(abs(diff_reef) > 25 |
            abs(diff_sol) > 25  ) %>% 
-  left_join(PtsPerImage, by=c("image_key" ="image_key"))
+  left_join(PtsPerImage, by=c("image_key" ="image_key")) 
   
-write_csv(T1, "Results/CheckpcReef.csv")
+  
+write_csv(T2, "Results/CheckpcReef.csv")
+
+
+CheckReef1 <-  T1 %>% 
+  filter(!is.na(guess_reef)) %>% 
+  group_by(OV_group, OV_CAT, OV_CD) %>% 
+  summarise(count = n(),
+            avpreef = mean(point_reef),
+            avgreef = mean(guess_reef),
+            avDifreef = mean(diff_reef))
+
+
 
 write_csv(Target, "Results/transectSummary.csv")
      
@@ -538,4 +553,13 @@ Reef_transectSummary %>%
 Reef_transectSummary %>% 
   write_csv("Results/Reef_transectSummary.csv")
     
-     
+
+
+VME_AnnoAll %>% 
+  ggplot(mapping = aes(x= (`SC-SOL`+`SU-SOL`), 
+                       y= PC_SolMatrix))+
+  geom_point() +
+  geom_text(aes(label=image_key))
+
+temp <- VME_AnnoAll %>% 
+  filter(image_key == "155_0472")
