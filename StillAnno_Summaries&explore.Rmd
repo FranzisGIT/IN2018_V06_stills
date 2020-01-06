@@ -429,7 +429,10 @@ VME_AnnoAll <- PCcoverbyImage %>%
          'SU-CONBIO',
          'SU-PEBGRAV',
          'SU-SAMU',
-         'NS') %>% 
+         'NS',
+         'OV_CD',
+         'OV_group',
+         'OV_CAT') %>% 
   left_join(TVME, by=c("image_key"="image_key"))
 
 #Reading out the data table is commented out
@@ -456,6 +459,9 @@ Reef_transectSummary <-  VME_AnnoAll %>%
   mutate(AVGReef = (GReef / VMEdone))
 
 ```
+
+
+### Ckecks of matrix point scores vs. matrix estimates
 
 Checking how well the estimated percent cover of coral matrix matches with  measured percent cover of coral matrix (dead & alive) 
 
@@ -533,7 +539,7 @@ VME_AnnoAll %>%
 
 ```
 
-A linear of these dta regression has R^2^ of 0.555:
+A linear regression of these data:
 
 ```{r linRegLive}
 # linear regression of head count vs pc cover live
@@ -543,6 +549,45 @@ Linear_SOL_live <- lm(`S.variabilis` ~ (`SC-SOL`), data = VME_AnnoAll)
 summary(Linear_SOL_live)
 
 ```
+
+Checking of the data where the difference between estimates and PC point scores are greater than 25% resulted in the identification of some data entry errors which were corrected. The remaining differences stem from two main sources: 
+
+(1) Point counts appeared to overall result in higher percent cover than by-eye estimates, especiallty where there were relatively small sandy patches beween matrix, the points **appear** to fall preferentially on matrix, despite the fact that points were randomly placed in images but 
+
+(2) Images with 'Low matrix' according to the impacts overview scores, especially where it was sediment filled or shaved, and 'shaved rubble' had high differences i percent cover of reef between the point scores the by-eye estimates.
+
+```{r MatrixCheck, tab.cap ="Distribution of average percent matrix cover differences by overview scoring category"}  
+
+T1 <- VME_AnnoAll %>% 
+  mutate(point_reef = (`SC-SOL`+`SU-SOL`+ `SC-ENLP`+ `SU-ENLP`+ `SC-MAD` + `SU-MAD`),
+         point_sol = (`SC-SOL`+`SU-SOL`),
+         guess_reef = (`PC_SolMatrix` + `PC_Sub_CoralReef` + `PC_EnallopMatrix`),
+         guess_sol = (`PC_SolMatrix`)) %>% 
+  mutate(diff_reef = (`point_reef` - `guess_reef`),
+         diff_sol = (`point_sol` - `guess_sol`)) 
+T2 <- T1 %>% 
+  filter(abs(diff_reef) > 25 |
+           abs(diff_sol) > 25  ) #%>% 
+  #left_join(PtsPerImage, by=c("image_key" ="image_key")) 
+  
+  
+#write_csv(T2, "Results/CheckpcReef.csv")
+
+
+CheckReef1 <-  T1 %>% 
+  filter(!is.na(guess_reef)) %>% 
+  group_by(OV_group, OV_CAT, OV_CD) %>% 
+  summarise(count = n(),
+            avpreef = mean(point_reef),
+            avgreef = mean(guess_reef),
+            avDifreef = mean(diff_reef)) %>% 
+  arrange(avDifreef)
+
+ kable(CheckReef1, caption="overview categories scored")
+```
+
+
+###Distribution of VME taxa over coral matrix percent by points
 
 The distribution of VME taxa over coral matrix substrates are graphed below.
 
@@ -586,75 +631,4 @@ VMEanno_DensQ %>%
 
 ## Impacts - overview dta from PC cover analyses
 
-Looking into the overview scores of potential gear impacts for still images 
-
-```{r TbImpOv, tab.cap ="Overviw scores grouped by impact classes"} 
-
-# data exploration for overview scoring
-OvCat<- PCcoverbyImage %>% 
-  group_by(OV_CAT, ImpGroup, ImpClass) %>% 
-  summarise(cntRec = n()) %>% 
-  arrange(ImpClass)
-
- kable(OvCat, caption="overview categories scored")
-```
-
-```{r FigImpactdata, eval = FALSE, out.width='100%', fig.align='center', fig.cap="Impact overview evaluation"}
-PCcoverbyImage %>% 
-  ggplot(aes(x = depth,
-             y = `SU-BCOR`,
-             colour = ImpClass))+
-  geom_point(alpha=0.2)+
-  facet_wrap(~MapLoc)
-
-PCcoverbyImage %>% 
-  ggplot(aes(x = depth,
-             y = (`SU-SOL`+ `SC-SOL`),
-             colour = ImpClass))+
-  geom_point(alpha=0.2)+
-  facet_wrap(~MapLoc)
-
-PC_cover %>% 
-   group_by(L2_Code) %>% 
-   ggplot(aes(x = ImpClass,
-              y = mean(PC_cover),
-              fill = L2_Code)) +
-     geom_col() +
-   theme(axis.text.x.bottom = element_text(angle = 90))
-
-PCcoverbyImage %>% 
-  ggplot(aes(x = depth,
-             y = (`SU-SOL`+ `SC-SOL`+`SU-BCOR`),
-             colour = ImpClass))+
-  geom_point(alpha=0.2)+
-  facet_wrap(~MapLoc) 
-
-```
-
-Looking at the distribution of the overview categories by seamount will help to identify locations for further scrutiny:
-
-```{r FigSMImpact, out.width='100%', fig.align='center', fig.cap="Overview of impact scores over depth for each seamount"}
-
-colpal <-  c("grey",
-            "blue",
-             "cyan",
-             "purple",
-             "Orchid",
-             "green",
-             "orange",
-             "red",
-             "brown",
-             "black")
-ggplot(PC_cover,
-       mapping = aes(x=factor(ImpClass),              #call the pre existing vector
-                    y=depth,
-                    colour = factor(ImpGroup)))+
-  geom_point(alpha=0.2)+
-  scale_y_reverse() +                            # reverse y-axis because it represents ocean depth 
-  theme(axis.text.x = element_text(angle = 90))+   # rotate the label on x-axis
-  scale_color_manual(values = colpal)+
-  labs(x="Impactclass", y="depth")+
-  facet_wrap(~MapLoc)
-
-
-```
+Looking into the overview scores of potential gear impacts for still images is done in a separate Markdown file.
