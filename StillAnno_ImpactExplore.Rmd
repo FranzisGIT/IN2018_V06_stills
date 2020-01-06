@@ -64,7 +64,7 @@ The overview annotations were separated out from percent cover data and grouped 
 PCcoverbyImage <- read_csv("Results/PCcoverbyImage.csv")
 # data exploration for overview scoring
 OvCat<- PCcoverbyImage %>% 
-  group_by(OV_group, OV_CAT, ImpGroup, ImpClass) %>% 
+  group_by(OV_group, OV_CAT, OV_CD, ImpGroup, ImpClass) %>% 
   summarise(cntRec = n()) %>% 
   arrange(ImpClass)
 
