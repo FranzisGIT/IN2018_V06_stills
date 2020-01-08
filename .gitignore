@@ -2,9 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
-
 data/
 results/
 maps/
 *.html
 *.docx
+StillAnno_Summaries-explore.html

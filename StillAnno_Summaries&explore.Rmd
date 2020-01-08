@@ -414,6 +414,7 @@ Combining the totals of the VME taxa annotations with the percent cover annotati
 
 VME_AnnoAll <- PCcoverbyImage %>% 
   select(image_key,
+         PpI,
          'SC-ENLP',
          'SU-ENLP',
          'SC-SOL',
@@ -567,8 +568,7 @@ T1 <- VME_AnnoAll %>%
          diff_sol = (`point_sol` - `guess_sol`)) 
 T2 <- T1 %>% 
   filter(abs(diff_reef) > 25 |
-           abs(diff_sol) > 25  ) #%>% 
-  #left_join(PtsPerImage, by=c("image_key" ="image_key")) 
+           abs(diff_sol) > 25  ) 
   
   
 #write_csv(T2, "Results/CheckpcReef.csv")
