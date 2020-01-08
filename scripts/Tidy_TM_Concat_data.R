@@ -239,7 +239,7 @@ OV1 <- OverviewScores %>%
 #join location info to the by image matrix and export for QGIS mapping\
 # join overview score to the data matrix
 PCcoverbyImage <- PC_cover %>% 
-  select(image_key, L2_Code,PC_cover) %>% 
+  select(image_key, PpI, L2_Code,PC_cover) %>% 
   spread(L2_Code, PC_cover) %>% 
   replace_na(list('SC-ENLP'=0,
                   'SU-ENLP'=0,
@@ -258,7 +258,7 @@ PCcoverbyImage <- PC_cover %>%
                   'SU-SAMU'=0,
                   'NS' = 0)) %>% 
   left_join(AllSTills, by=c("image_key"="KEY")) %>% 
-  left_join(OV1, by=c("image_key"="image_key"))
+  left_join(OV1, by=c("image_key"="image_key")) 
 
 write_csv(PCcoverbyImage, "Results/PCcoverbyImage.csv")
 
